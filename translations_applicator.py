@@ -95,12 +95,20 @@ def apply_translations(lang_code):
     print(f"Error: info.xml not found in '{input_dir}'")
     return
   
-  # Parse info.xml to extract file paths
+  # Parse info.xml to extract file paths and original version
   input_files = []
+  original_version = ""
   try:
     import xml.etree.ElementTree as ET
     tree = ET.parse(info_xml_path)
     root = tree.getroot()
+    
+    # Extract original version from root element attribute
+    original_version = root.get('version', '')
+    if original_version:
+      print(f"Original version detected: {original_version}")
+    else:
+      print("Warning: Could not detect original version from info.xml")
     
     # Find all <string path="..."/> elements
     for string_element in root.find('strings').findall('string'):
@@ -123,6 +131,16 @@ def apply_translations(lang_code):
   if not input_files:
     print("No valid files found in info.xml")
     return
+  
+  # Clean up old files in output directory
+  if os.path.exists(output_dir):
+    print(f"Cleaning up old files in {output_dir}...")
+    try:
+      import shutil
+      shutil.rmtree(output_dir)
+      print(f"Removed old output directory: {output_dir}")
+    except Exception as e:
+      print(f"Warning: Could not remove old output directory: {e}")
   
   # Create output directory structure
   Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -278,6 +296,20 @@ def apply_translations(lang_code):
   print(f"\nProcessing completed!")
   print(f"Total files processed: {len(processed_files)}/{len(input_files)}")
   print(f"Files skipped: {len(input_files) - len(processed_files)}")
+  
+  # Create zip_name.txt file
+  try:
+    zip_name_content = f"SupersStoryStrings_{lang_code.upper()}-EN_@ClientEN@-@{original_version}-mod_{mod_version}@"
+    zip_name_path = os.path.join(output_dir, "zip_name.txt")
+    
+    with open(zip_name_path, 'w', encoding='utf-8') as f:
+      f.write(zip_name_content)
+    
+    print(f"Created zip name file: {zip_name_path}")
+    print(f"Zip name: {zip_name_content}")
+    
+  except Exception as e:
+    print(f"Error creating zip_name.txt: {e}")
 
 def process_single_file(input_file, lang_code, translations_dir, output_file, special_cases_file, current_file=1, total_files=1):
   """
