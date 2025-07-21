@@ -108,12 +108,12 @@
       },
       {
         "id": "1000",
-        "translation": "\\n\\n LOGIN \\n\\n",
+        "translation": " \\n        Login        \\n ",
         "reason": "Pulsante login"
       },
       {
         "id": "1003", 
-        "translation": "\\n\\n\\nLogging in...\\n\\n",
+        "translation": " \\n    Logging in...    \\n ",
         "reason": "Pulsante login premuto"
       },
       {
