@@ -87,6 +87,20 @@
         "comment": "A very light stone. --x-> A very Chiarolite."
       }
     ],
+    "words": [
+      {
+        "word": "Lure",
+        "mode": "whole-string",
+        "exceptions": ["245494"],
+        "comment": "Non tradurre 'Lure' in 'Profumo Invito' e simili per consistenza con la community inglese. Eccezioni: Lure Ball ---> Esca Ball"
+      },
+      {
+        "word": "Shiny",
+        "mode": "word-only",
+        "exceptions": [],
+        "comment": "Mantieni 'Shiny' non tradotto per consistenza con la community inglese"
+      }
+    ],
     "reason": "Non traduce"
   },
   "override_translation": {

@@ -142,19 +142,19 @@
     <string id="245079">&#xA000;Repellente</string>
     <string id="245076">&#xA001;Superrepellente</string>
     <string id="245077">&#xA002;Repellente Max</string>
-    <string id="101654">&#xA003;Profumo invito</string>
+    <string id="101654">&#xA003;Lure</string>
 <!--        <string id="101655">A lure which attracts wild {STRING_0} for 100 steps. It has several effects while active:\n\n- Encounter rates increased by +10%\n- Foes are slightly stronger than normal {STRING_0} in the area\n- You may encounter more foes at the same time\n- 5% chance to encounter lure-exclusive species\n\nConsumed upon use.</string>-->
-    <string id="101656">&#xA004;Superprofumo</string>
+    <string id="101656">&#xA004;Super Lure</string>
 <!--        <string id="101657">A lure which attracts wild {STRING_0} for 200 steps. It has several effects while active:\n\n- Encounter rates increased by +10%\n- Foes are slightly stronger than normal {STRING_0} in the area\n- You may encounter more foes at the same time\n- 5% chance to encounter lure-exclusive species\n\nConsumed upon use.</string>-->
-    <string id="101658">&#xA005;Expert Profumo invito</string>
+    <string id="101658">&#xA005;Expert Lure</string>
 <!--        <string id="101659">A lure which attracts wild {STRING_0} for 250 steps. It has several effects while active:\n\n- Encounter rates increased by +10%\n- Foes are slightly stronger than normal {STRING_0} in the area\n- You may encounter more foes at the same time\n- 5% chance to encounter lure-exclusive species\n\nConsumed upon use.</string>-->
-    <string id="101709">&#xA006;Legendary Profumo invito</string>
+    <string id="101709">&#xA006;Legendary Lure</string>
 <!--        <string id="101710">A special lure which attracts roaming Legendary {STRING_0} and others for 300 steps. It has several effects while active:\n\n- +15% encounter rates\n- +30% chance to encounter a Roaming Legendary if not already captured\n- Foes are stronger than normal encounters in the area\n- You may encounter more foes at the same time\n- 8% chance to encounter lure-exclusive species\n\nConsumed upon use.</string>-->
-    <string id="101660">&#xA007;Premium Profumo invito</string>
+    <string id="101660">&#xA007;Premium Lure</string>
 <!--        <string id="101661">A premium lure which attracts wild {STRING_0} for 200 steps. It has several effects while active:\n\n- +25% encounter rates\n- Foes are stronger than normal encounters in the area\n- You may encounter more foes at the same time\n- 10% chance to encounter lure-exclusive species\n- Small hordes (3) may increase in size\n- If you encounter a Shiny {STRING_0}, "Secret Shiny" rates are increased by +25%\n\nConsumed upon use.</string>-->
-    <string id="101662">&#xA008;Premium Superprofumo</string>
+    <string id="101662">&#xA008;Premium Super Lure</string>
 <!--        <string id="101663">A premium lure which attracts wild {STRING_0} for 300 steps. It has several effects while active:\n\n- +25% encounter rates\n- Foes are stronger than normal encounters in the area\n- You may encounter more foes at the same time\n- 10% chance to encounter lure-exclusive species\n- Small hordes (3) may increase in size\n- If you encounter a Shiny {STRING_0}, "Secret Shiny" rates are increased by +25%\n\nConsumed upon use.</string>-->
-    <string id="101664">&#xA009;Premium Profumo Max</string>
+    <string id="101664">&#xA009;Premium Max Lure</string>
 <!--        <string id="101665">A premium lure which attracts wild {STRING_0} for 400 steps. It has several effects while active:\n\n- +25% encounter rates\n- Foes are stronger than normal encounters in the area\n- You may encounter more foes at the same time\n- 10% chance to encounter lure-exclusive species\n- Small hordes (3) may increase in size\n- If you encounter a Shiny {STRING_0}, "Secret Shiny" rates are increased by +25%\n\nConsumed upon use.</string>-->
 
     <string id="101302">&#xA010;{STRING_110019} Ocarina</string><!--Fly-->
@@ -912,7 +912,7 @@
         <string id="135495">A Poké Ball for catching very heavy\nPokémon.\n\n1.0x for species with &#x3C; [100kg | 220.46lbs]\n2.0x for species with &#x3C; [200kg | 440.92lbs]\n3.0x for species with &#x3C; [300kg | 661.38lbs]\n4.0x for species with &#x3E;= [300kg | 661.38lbs]</string>
     <string id="245493">&#xA012;Level Ball</string>
     <string id="245496">&#xA013;Love Ball</string>
-    <string id="245494">&#xA014;Esca Ball</string>
+    <string id="245494">&#xA014;Lure Ball</string>
     <string id="245011">&#xA015;Chic Ball</string>
     <string id="245498">&#xA016;Luna Ball</string>
         <string id="135498">A Poké Ball for catching any Pokémon in an evolution line that includes a Pietralunare evolution.</string>

@@ -347,6 +347,7 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
   special_cases = {}
   global_add_translations = {}
   global_no_translation_ids = set()
+  global_no_translation_words = {}  # word -> {"mode": str, "exceptions": set}
   global_override_translations = {}  # Store override translations globally
   global_transform_translations = {}  # Store transform translations globally
   add_block_data = {}  # Initialize add_block_data
@@ -453,6 +454,7 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
         # Handles global no_translation
         if "no_translation" in special_cases_data:
           no_translation_ids = special_cases_data["no_translation"].get("ids", [])
+          no_translation_words = special_cases_data["no_translation"].get("words", [])
           
           # Expand ranges in no_translation IDs
           for id_entry in no_translation_ids:
@@ -481,7 +483,44 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
               comment_info = f" ({comment})" if comment else ""
               print(f"Added no_translation ID: {id_item}{comment_info}")
           
+          # Process no_translation words
+          for word_entry in no_translation_words:
+            word = word_entry.get("word", "")
+            mode = word_entry.get("mode", "word-only")  # Default to word-only mode
+            exceptions_list = word_entry.get("exceptions", [])  # List of ID exceptions
+            comment = word_entry.get("comment", "")
+            
+            if word:
+              # Expand ranges in exceptions
+              exceptions_set = set()
+              for exception in exceptions_list:
+                if "-" in str(exception) and str(exception).replace("-", "").replace(".", "").isdigit():
+                  # It's a range: "101-105"
+                  try:
+                    start, end = str(exception).split("-")
+                    start_id = int(start)
+                    end_id = int(end)
+                    
+                    # Add all IDs in the range
+                    for id_num in range(start_id, end_id + 1):
+                      exceptions_set.add(str(id_num))
+                  except ValueError:
+                    print(f"Error parsing exception range: {exception}")
+                else:
+                  # Single ID
+                  exceptions_set.add(str(exception))
+              
+              global_no_translation_words[word] = {
+                "mode": mode,
+                "exceptions": exceptions_set
+              }
+              
+              comment_info = f" ({comment})" if comment else ""
+              exceptions_info = f" [exceptions: {len(exceptions_set)} IDs]" if exceptions_set else ""
+              print(f"Added no_translation word: {word} [mode: {mode}]{exceptions_info}{comment_info}")
+          
           print(f"Loaded {len(global_no_translation_ids)} IDs for global no_translation")
+          print(f"Loaded {len(global_no_translation_words)} words for global no_translation")
           del special_cases_data["no_translation"]
         
         # Expand ranges in IDs
@@ -556,17 +595,29 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
   context_specific_count = len(type_translations) + len(move_translations) + len(ability_translations) + len(item_translations)
   print(f"Loaded {total_translations} translations for '{lang_code}' (context-specific: {context_specific_count})")
   
-  def get_contextual_translation(english_term, context_text):
+  def get_contextual_translation(english_term, context_text, string_id=None):
     """
     Decides which translation to use based on context.
     
     Args:
       english_term (str): English term to translate
       context_text (str): Context text for analysis
+      string_id (str): ID of the current string (for exceptions)
       
     Returns:
       str or None: Translated term or None if no translation found
     """
+    # HIGHEST PRIORITY: Check if the word is in no_translation words list with word-only mode
+    if english_term in global_no_translation_words:
+      word_data = global_no_translation_words[english_term]
+      if word_data["mode"] == "word-only":
+        # Check if this ID is in exceptions
+        if string_id and string_id in word_data["exceptions"]:
+          pass  # Allow translation for this ID
+        else:
+          return None  # Don't translate this word
+      # Note: whole-string mode is handled elsewhere, not here
+    
     context_lower = context_text.lower()
     
     # If text is very long (>50 chars) or contains complete sentences, 
@@ -669,6 +720,30 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
   print(f"Processing file: {input_file} -> {output_file}")
   print(f"Compiled regex patterns: {len(compiled_patterns)}")
   
+  # Helper function to check if text contains whole-string banned words
+  def contains_whole_string_banned_words(text, string_id):
+    """
+    Check if text contains words that should prevent translation of the entire string.
+    
+    Args:
+      text (str): Text to check
+      string_id (str): ID of the current string (for exceptions)
+      
+    Returns:
+      bool: True if text contains whole-string banned words (without exceptions)
+    """
+    for word, word_data in global_no_translation_words.items():
+      if word_data["mode"] == "whole-string":
+        # Check if this ID is in exceptions
+        if string_id in word_data["exceptions"]:
+          continue  # Skip this word for this ID
+        
+        # Use word boundary regex to match whole words only
+        pattern = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE)
+        if pattern.search(text):
+          return True
+    return False
+  
   # Find all string tags with regex that includes the ID
   string_pattern = r'(<string\s+id="([^"]+)"[^>]*>)(.*?)(</string>)'
   
@@ -713,6 +788,13 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
       print(f"[File {current_file}/{total_files}] [{current:04}/{total_elements} - {percent:.1f}%] - [NO_TRANSLATION] ID:{string_id} - Global category")
       return match.group(0)  # Returns original text without changes
 
+    # HIGH PRIORITY: Check for whole-string banned words
+    if contains_whole_string_banned_words(original_text, string_id):
+      not_translated_count += 1
+      special_cases_applied += 1
+      print(f"[File {current_file}/{total_files}] [{current:04}/{total_elements} - {percent:.1f}%] - [NO_TRANSLATION_WORD] ID:{string_id} - Contains whole-string banned word")
+      return match.group(0)  # Returns original text without changes
+
     # HIGH PRIORITY: Check global transform_translation
     if string_id in global_transform_translations:
       transform_data = global_transform_translations[string_id]
@@ -751,7 +833,7 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
               translated_term = global_add_translations[main_term]
             # Then search with contextual function
             else:
-              translated_term = get_contextual_translation(main_term, original_text)
+              translated_term = get_contextual_translation(main_term, original_text, string_id)
             
             if translated_term:
               template_vars["translated"] = translated_term
@@ -810,7 +892,7 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
     translated_text = None
     
     # First try a complete translation with context
-    contextual_translation = get_contextual_translation(original_text, original_text)
+    contextual_translation = get_contextual_translation(original_text, original_text, string_id)
     if contextual_translation:
       translated_text = contextual_translation
     else:
@@ -820,8 +902,17 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
       
       for compiled_pattern, english_term in compiled_patterns:
         if compiled_pattern.search(working_text):
+          # Check if the word is in no_translation words list with word-only mode
+          if english_term in global_no_translation_words:
+            word_data = global_no_translation_words[english_term]
+            if word_data["mode"] == "word-only":
+              # Check if this ID is in exceptions
+              if string_id not in word_data["exceptions"]:
+                # Skip translation for this word
+                continue
+          
           # Use contextual translation for each term
-          context_translation = get_contextual_translation(english_term, original_text)
+          context_translation = get_contextual_translation(english_term, original_text, string_id)
           if context_translation:
             working_text = compiled_pattern.sub(context_translation, working_text)
       
@@ -834,6 +925,13 @@ def process_single_file(input_file, lang_code, translations_dir, output_file, sp
     if translated_text and '(' in translated_text and ')' in translated_text:
       def translate_parentheses_content(match):
         content = match.group(1)
+        # Check if the word is in no_translation words list with word-only mode
+        if content in global_no_translation_words:
+          word_data = global_no_translation_words[content]
+          if word_data["mode"] == "word-only":
+            # Check if this ID is in exceptions
+            if string_id not in word_data["exceptions"]:
+              return match.group(0)  # Don't translate
         # Parentheses ALWAYS indicate a type, so force type_translations
         if content in type_translations:
           return f"({type_translations[content]})"
