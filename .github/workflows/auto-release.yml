@@ -158,13 +158,6 @@ jobs:
         echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
         echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
         echo "Calculated new release tag: $NEW_MOD_VERSION"
-        
-        # New tag uses same mod version with new submodule tag
-        NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
-        
-        echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
-        echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
-        echo "Calculated new release tag: $NEW_MOD_VERSION"
     
     - name: Set up Python
       if: steps.check_update.outputs.updated == 'true'
@@ -440,36 +433,75 @@ jobs:
         SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
         ZIP_NAME="${{ steps.create_package.outputs.zip_name }}"
         
+        # Determine if this is an automatic release
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          RELEASE_TYPE=""
+          VERSION_SUFFIX=""
+        else
+          RELEASE_TYPE=" - AUTOMATIC RELEASE"
+          VERSION_SUFFIX=" - AUTOMATIC RELEASE"
+        fi
+        
+        # Create new release title
+        NEW_TITLE="SupersStoryStrings ${NEW_TAG}${RELEASE_TYPE}"
+        
         # Read previous release body
         PREV_BODY=$(cat prev_release_body.txt)
         
-        # Create new release body with updated changelog
-        NEW_CHANGELOG_ENTRY="
-        **Version mod_${MOD_VERSION} - AUTOMATIC UPDATE:**
-        - Updated SupersStoryStrings to [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
+        # Create new changelog entry
+        NEW_CHANGELOG_ENTRY="**Version ${NEW_TAG}${VERSION_SUFFIX}:**
+        - Updated SupersStrings to version [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
         
-        # Insert new changelog entry after "## Changelog"
+        # Build the new release body
+        # Start with standard description
+        NEW_BODY="This mod translates the following into Italian: Buttons, Items, Natures (Multi-language), Abilities (Multi-language), and Locations (Multi-language).
+        
+        > [!NOTE]  
+        > This release is intended for use with the PokeMMO client set to English.  
+        > If you want to use the strings with a different client language, you will need to edit \`lang=\"en\"\` and/or \`lang_full=\"English\"\` at the beginning of each \`.xml\` file inside the \`/strings\` folder in the ZIP archive, so they match your client's language settings.
+        
+        ***
+        
+        ## Changelog
+        
+        ${NEW_CHANGELOG_ENTRY}"
+        
+        # Extract existing changelog entries from previous release (skip the first entry which we're replacing)
         if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
-          # Split the body at "## Changelog" and insert our entry
-          BEFORE_CHANGELOG=$(echo "$PREV_BODY" | sed '/## Changelog/q')
-          AFTER_CHANGELOG=$(echo "$PREV_BODY" | sed '1,/## Changelog/d')
+          # Get everything after "## Changelog"
+          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed '1,/## Changelog/d')
           
-          NEW_BODY="${BEFORE_CHANGELOG}${NEW_CHANGELOG_ENTRY}
-        ${AFTER_CHANGELOG}"
-        else
-          # If no changelog section exists, add it
-          NEW_BODY="${PREV_BODY}
+          # Skip the first version entry (it's the one we're updating)
+          # Look for the second "**Version" to start preserving from there
+          if [[ "$EXISTING_CHANGELOG" == *"**Version"* ]]; then
+            # Find the start of the second version entry
+            SECOND_VERSION_START=$(echo "$EXISTING_CHANGELOG" | grep -n "^**Version" | sed -n '2p' | cut -d: -f1)
+            
+            if [ -n "$SECOND_VERSION_START" ]; then
+              # Keep everything from the second version onwards
+              PRESERVED_CHANGELOG=$(echo "$EXISTING_CHANGELOG" | tail -n +$SECOND_VERSION_START)
+              NEW_BODY="${NEW_BODY}
         
-        ## Changelog${NEW_CHANGELOG_ENTRY}"
+        ${PRESERVED_CHANGELOG}"
+            fi
+          fi
         fi
+        
+        # Add credits section
+        NEW_BODY="${NEW_BODY}
+        
+        ## Credits
+        
+        Special thanks to @SuperWorldSun for creating the best custom strings for PokeMMO: [SupersStrings](https://github.com/superworldsun/SupersStrings)"
         
         # Create the release
         gh release create "$NEW_TAG" \
-          --title "$NEW_TAG" \
+          --title "$NEW_TITLE" \
           --notes "$NEW_BODY" \
           "${ZIP_NAME}.mod"
         
         echo "Created release: $NEW_TAG"
+        echo "Release title: $NEW_TITLE"
         echo "Uploaded file: ${ZIP_NAME}.mod"
       env:
         GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
