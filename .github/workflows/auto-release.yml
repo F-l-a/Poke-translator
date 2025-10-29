@@ -1,10 +1,25 @@
 name: Auto Release Translation
 
 on:
+  # Trigger automatico quando il workflow Update Submodules completa con successo
   workflow_run:
     workflows: ["Update Submodules"]
     types:
       - completed
+  
+  # Permetti esecuzione manuale per test e forzatura release
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: 'Force release even if no submodule update detected'
+        required: false
+        default: 'false'
+        type: boolean
+      mod_version:
+        description: 'Override mod version (e.g., 1.0.1a) - leave empty for auto-increment'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -12,7 +27,8 @@ permissions:
 jobs:
   auto-release:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Run if: automatic trigger succeeded OR manual trigger
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     
     steps:
     - name: Checkout repository with submodules
@@ -60,22 +76,48 @@ jobs:
     - name: Check if submodule was actually updated
       id: check_update
       run: |
-        # Check if the last commit was a submodule update
-        LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
-        
-        if [[ "$LAST_COMMIT_MSG" == *"Auto-update SupersStrings submodule"* ]]; then
-          echo "updated=true" >> $GITHUB_OUTPUT
-          echo "commit_msg=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
-          
-          # Extract SupersStrings version from submodule
-          cd input/SupersStrings
-          SUBMODULE_TAG=$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0)
-          echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
-          echo "SupersStrings version: $SUBMODULE_TAG"
-          cd ../..
+        # Check if this is a manual run with force_release
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ inputs.force_release }}" = "true" ]; then
+            echo "Manual execution with force_release=true - proceeding regardless of commit message"
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "commit_msg=Manual release forced by user" >> $GITHUB_OUTPUT
+          else
+            echo "Manual execution without force_release - checking for actual updates"
+            # Check for submodule updates in recent commits (last 5 commits)
+            RECENT_UPDATES=$(git log -5 --pretty=format:"%s" | grep -c "Auto-update SupersStrings submodule" || echo "0")
+            
+            if [ "$RECENT_UPDATES" -gt 0 ]; then
+              echo "Found recent submodule update in last 5 commits"
+              echo "updated=true" >> $GITHUB_OUTPUT
+              echo "commit_msg=Manual release with recent submodule update detected" >> $GITHUB_OUTPUT
+            else
+              echo "No recent submodule updates found - use force_release=true to override"
+              echo "updated=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
         else
-          echo "updated=false" >> $GITHUB_OUTPUT
+          # Automatic execution - check last commit message
+          LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+          
+          if [[ "$LAST_COMMIT_MSG" == *"Auto-update SupersStrings submodule"* ]]; then
+            echo "Automatic execution: submodule update detected"
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "commit_msg=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
+          else
+            echo "Automatic execution: no submodule update detected"
+            echo "updated=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
         fi
+        
+        # Extract SupersStrings version from submodule (common for all execution types)
+        cd input/SupersStrings
+        SUBMODULE_TAG=$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0)
+        echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
+        echo "SupersStrings version: $SUBMODULE_TAG"
+        cd ../..
     
     - name: Calculate new mod version
       if: steps.check_update.outputs.updated == 'true'
@@ -83,26 +125,39 @@ jobs:
       run: |
         SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
         
-        # Get the latest release tag to extract current mod version
-        LATEST_RELEASE_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
-        
-        if [ -z "$LATEST_RELEASE_TAG" ]; then
-          # No previous mod releases - start with 1.0.0a
-          MOD_VERSION="1.0.0a"
-          echo "No previous releases found, starting with mod version: $MOD_VERSION"
+        # Check if manual mod version override is provided
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mod_version }}" ]; then
+          MOD_VERSION="${{ inputs.mod_version }}"
+          echo "Using manual mod version override: $MOD_VERSION"
         else
-          # Extract mod version from latest release tag
-          # Pattern: v1.3.4-mod_1.0.0a -> extract "1.0.0a"
-          MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+a\?\)$/\1/p')
+          # Get the latest release tag to extract current mod version
+          LATEST_RELEASE_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
           
-          if [ -z "$MOD_VERSION" ]; then
-            # Fallback if extraction fails
+          if [ -z "$LATEST_RELEASE_TAG" ]; then
+            # No previous mod releases - start with 1.0.0a
             MOD_VERSION="1.0.0a"
-            echo "Could not extract mod version from $LATEST_RELEASE_TAG, using fallback: $MOD_VERSION"
+            echo "No previous releases found, starting with mod version: $MOD_VERSION"
           else
-            echo "Extracted mod version from latest release: $MOD_VERSION"
+            # Extract mod version from latest release tag
+            # Pattern: v1.3.4-mod_1.0.0a -> extract "1.0.0a"
+            MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+a\?\)$/\1/p')
+            
+            if [ -z "$MOD_VERSION" ]; then
+              # Fallback if extraction fails
+              MOD_VERSION="1.0.0a"
+              echo "Could not extract mod version from $LATEST_RELEASE_TAG, using fallback: $MOD_VERSION"
+            else
+              echo "Extracted mod version from latest release: $MOD_VERSION"
+            fi
           fi
         fi
+        
+        # New tag uses same mod version with new submodule tag
+        NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
+        
+        echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
+        echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
+        echo "Calculated new release tag: $NEW_MOD_VERSION"
         
         # New tag uses same mod version with new submodule tag
         NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
@@ -422,11 +477,29 @@ jobs:
     - name: Summary
       if: steps.check_update.outputs.updated == 'true'
       run: |
-        echo "## 🚀 Auto-Release Completed!" >> $GITHUB_STEP_SUMMARY
+        # Determine execution type for summary
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ inputs.force_release }}" = "true" ]; then
+            EXEC_TYPE="� Manual Release (Forced)"
+          else
+            EXEC_TYPE="🔧 Manual Release"
+          fi
+        else
+          EXEC_TYPE="🤖 Automatic Release"
+        fi
+        
+        echo "## 🚀 Release Completed!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Execution Type**: $EXEC_TYPE" >> $GITHUB_STEP_SUMMARY
         echo "**New Release**: \`${{ steps.calc_version.outputs.new_mod_version }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**SupersStrings Version**: \`${{ steps.check_update.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.mod\`" >> $GITHUB_STEP_SUMMARY
+        
+        # Add manual override info if applicable
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mod_version }}" ]; then
+          echo "**Mod Version Override**: \`${{ inputs.mod_version }}\`" >> $GITHUB_STEP_SUMMARY
+        fi
+        
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 🔄 Process:" >> $GITHUB_STEP_SUMMARY
         echo "1. ✅ Detected SupersStrings update" >> $GITHUB_STEP_SUMMARY
@@ -438,6 +511,15 @@ jobs:
     - name: No updates summary
       if: steps.check_update.outputs.updated == 'false'
       run: |
-        echo "## ℹ️ No Auto-Release Needed" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "The workflow completed but no submodule update was detected." >> $GITHUB_STEP_SUMMARY
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "## ℹ️ Manual Release Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The workflow was run manually but no release was created." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason**: No recent submodule updates detected" >> $GITHUB_STEP_SUMMARY
+          echo "**Tip**: Use \`force_release=true\` to create a release anyway" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## ℹ️ No Auto-Release Needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The workflow completed but no submodule update was detected." >> $GITHUB_STEP_SUMMARY
+        fi
