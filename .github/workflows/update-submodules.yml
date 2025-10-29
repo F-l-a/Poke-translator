@@ -22,27 +22,6 @@ jobs:
         submodules: recursive
         token: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
     
-    - name: Initialize and verify submodules
-      run: |
-        echo "Checking submodule status..."
-        git submodule status
-        
-        echo "Ensuring submodules are properly initialized..."
-        git submodule update --init --recursive
-        
-        echo "Verifying SupersStrings submodule exists..."
-        if [ ! -d "input/SupersStrings" ]; then
-          echo "Error: SupersStrings submodule directory not found!"
-          echo "Available directories in input/:"
-          ls -la input/ || echo "input/ directory not found"
-          echo "Submodule configuration:"
-          cat .gitmodules || echo ".gitmodules not found"
-          exit 1
-        fi
-        
-        echo "✅ SupersStrings submodule verified at: input/SupersStrings"
-        ls -la input/SupersStrings/
-    
     - name: Check for new releases and update submodules
       run: |
         git config --global user.name 'github-actions[bot]'
