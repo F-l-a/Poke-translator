@@ -178,6 +178,23 @@ jobs:
         echo "${{ steps.version_info.outputs.changelog }}" >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
     
+    - name: Trigger automatic release
+      if: steps.update.outputs.has_updates == 'true'
+      run: |
+        echo "🚀 Triggering automatic release workflow..."
+        gh workflow run auto-release.yml \
+          --field force_release=true \
+          --field is_automatic=true
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY  
+        echo "🚀 **Automatic Release Triggered!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The auto-release workflow has been started automatically." >> $GITHUB_STEP_SUMMARY
+        echo "Check the [Actions tab](https://github.com/${{ github.repository }}/actions) for progress." >> $GITHUB_STEP_SUMMARY
+      env:
+        GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
+    
     - name: No updates summary
       if: steps.update.outputs.has_updates == 'false'
       run: |

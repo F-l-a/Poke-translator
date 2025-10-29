@@ -1,12 +1,6 @@
 name: Auto Release Translation
 
 on:
-  # Trigger automatico quando il workflow Update Submodules completa con successo
-  workflow_run:
-    workflows: ["Update Submodules"]
-    types:
-      - completed
-  
   # Permetti esecuzione manuale per test e forzatura release
   workflow_dispatch:
     inputs:
@@ -20,6 +14,20 @@ on:
         required: false
         default: ''
         type: string
+      is_automatic:
+        description: 'Mark this as an        # Determine execution type for summary
+        if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
+          EXEC_TYPE="🤖 Automatic Release"
+        else
+          if [ "${{ inputs.force_release }}" = "true" ]; then
+            EXEC_TYPE="🔧 Manual Release (Forced)"
+          else
+            EXEC_TYPE="🔧 Manual Release"
+          fi
+        fi release (internal use)'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: write
@@ -27,8 +35,8 @@ permissions:
 jobs:
   auto-release:
     runs-on: ubuntu-latest
-    # Run if: automatic trigger succeeded OR manual trigger
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Only run for manual workflow dispatch
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     
     steps:
     - name: Checkout repository with submodules
@@ -76,8 +84,16 @@ jobs:
     - name: Check if submodule was actually updated
       id: check_update
       run: |
-        # Check if this is a manual run with force_release
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+        # Determine if this is an automatic release (triggered by update-submodules)
+        if [ "${{ inputs.is_automatic }}" = "true" ]; then
+          echo "🤖 Automatic release triggered by update-submodules workflow"
+          echo "updated=true" >> $GITHUB_OUTPUT
+          echo "commit_msg=Automatic release triggered by submodule update" >> $GITHUB_OUTPUT
+          echo "is_automatic_release=true" >> $GITHUB_OUTPUT
+        else
+          echo "🔧 Manual release execution"
+          echo "is_automatic_release=false" >> $GITHUB_OUTPUT
+          
           if [ "${{ inputs.force_release }}" = "true" ]; then
             echo "Manual execution with force_release=true - proceeding regardless of commit message"
             echo "updated=true" >> $GITHUB_OUTPUT
@@ -97,19 +113,6 @@ jobs:
               exit 0
             fi
           fi
-        else
-          # Automatic execution - check last commit message
-          LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
-          
-          if [[ "$LAST_COMMIT_MSG" == *"Auto-update SupersStrings submodule"* ]]; then
-            echo "Automatic execution: submodule update detected"
-            echo "updated=true" >> $GITHUB_OUTPUT
-            echo "commit_msg=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
-          else
-            echo "Automatic execution: no submodule update detected"
-            echo "updated=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
         fi
         
         # Extract SupersStrings version from submodule (common for all execution types)
@@ -126,7 +129,7 @@ jobs:
         SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
         
         # Check if manual mod version override is provided
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mod_version }}" ]; then
+        if [ "${{ inputs.is_automatic }}" != "true" ] && [ -n "${{ inputs.mod_version }}" ]; then
           MOD_VERSION="${{ inputs.mod_version }}"
           echo "Using manual mod version override: $MOD_VERSION"
         else
@@ -156,7 +159,7 @@ jobs:
               echo "Latest release tag was: $LATEST_RELEASE_TAG"
               
               # For automatic releases: if the previous version doesn't have 'a' suffix, add it
-              if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+              if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
                 # Check if version already ends with 'a'
                 if [[ ! "$MOD_VERSION" =~ [a-z]$ ]]; then
                   MOD_VERSION="${MOD_VERSION}a"
@@ -490,12 +493,12 @@ jobs:
         ZIP_NAME="${{ steps.create_package.outputs.zip_name }}"
         
         # Determine if this is an automatic release
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          RELEASE_TYPE=""
-          VERSION_SUFFIX=""
-        else
+        if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
           RELEASE_TYPE=" - AUTOMATIC RELEASE"
           VERSION_SUFFIX=" - AUTOMATIC RELEASE"
+        else
+          RELEASE_TYPE=""
+          VERSION_SUFFIX=""
         fi
         
         # Create new release title
@@ -522,33 +525,18 @@ jobs:
         
         ${NEW_CHANGELOG_ENTRY}"
         
-        # Extract existing changelog entries from previous release (skip the first entry which we're replacing)
+        # Extract and preserve EVERYTHING after "## Changelog" from previous release
         if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
-          # Get everything after "## Changelog"
-          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed '1,/## Changelog/d')
+          # Get everything after "## Changelog" line
+          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed -n '/## Changelog/,$p' | tail -n +2)
           
-          # Skip the first version entry (it's the one we're updating)
-          # Look for the second "**Version" to start preserving from there
-          if [[ "$EXISTING_CHANGELOG" == *"**Version"* ]]; then
-            # Find the start of the second version entry
-            SECOND_VERSION_START=$(echo "$EXISTING_CHANGELOG" | grep -n "^**Version" | sed -n '2p' | cut -d: -f1)
-            
-            if [ -n "$SECOND_VERSION_START" ]; then
-              # Keep everything from the second version onwards
-              PRESERVED_CHANGELOG=$(echo "$EXISTING_CHANGELOG" | tail -n +$SECOND_VERSION_START)
-              NEW_BODY="${NEW_BODY}
+          # If there's existing changelog content, preserve it all
+          if [ -n "$EXISTING_CHANGELOG" ] && [ "$EXISTING_CHANGELOG" != "" ]; then
+            NEW_BODY="${NEW_BODY}
         
-        ${PRESERVED_CHANGELOG}"
-            fi
+        ${EXISTING_CHANGELOG}"
           fi
         fi
-        
-        # Add credits section
-        NEW_BODY="${NEW_BODY}
-        
-        ## Credits
-        
-        Special thanks to @SuperWorldSun for creating the best custom strings for PokeMMO: [SupersStrings](https://github.com/superworldsun/SupersStrings)"
         
         # Create the release
         gh release create "$NEW_TAG" \
@@ -584,7 +572,7 @@ jobs:
         echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.zip\`" >> $GITHUB_STEP_SUMMARY
         
         # Add manual override info if applicable
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mod_version }}" ]; then
+        if [ "${{ steps.check_update.outputs.is_automatic_release }}" != "true" ] && [ -n "${{ inputs.mod_version }}" ]; then
           echo "**Mod Version Override**: \`${{ inputs.mod_version }}\`" >> $GITHUB_STEP_SUMMARY
         fi
         
@@ -599,15 +587,9 @@ jobs:
     - name: No updates summary
       if: steps.check_update.outputs.updated == 'false'
       run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "## ℹ️ Manual Release Skipped" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The workflow was run manually but no release was created." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Reason**: No recent submodule updates detected" >> $GITHUB_STEP_SUMMARY
-          echo "**Tip**: Use \`force_release=true\` to create a release anyway" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "## ℹ️ No Auto-Release Needed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The workflow completed but no submodule update was detected." >> $GITHUB_STEP_SUMMARY
-        fi
+        echo "## ℹ️ Manual Release Skipped" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The workflow was run manually but no release was created." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Reason**: No recent submodule updates detected" >> $GITHUB_STEP_SUMMARY
+        echo "**Tip**: Use \`force_release=true\` to create a release anyway" >> $GITHUB_STEP_SUMMARY

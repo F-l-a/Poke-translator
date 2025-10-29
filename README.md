@@ -3,6 +3,15 @@
 A CLI tool in Python that generates multilingual JSON dictionaries using [PokeAPI](https://pokeapi.co) and applies translations to [SupersStrings](https://github.com/superworldsun/SupersStrings) files via key-value matching.
 Italian translations are already present in this repository, but other languages are supported via PokeAPI.
 
+### Notes
+- sws_strings_en.xml: Misc + Buttons + NPCs + Items + Natures -> Translate all
+- sws_en_Unova_0.xml: Gyms/E4 (End Battle) (Unova) + Pokedex -> Translate Pokedex
+- sws_en_Unova_1.xml: HMs (Unova) + NPCs + Gyms/E4 (Unova)
+- sws_en_Sinnoh.xml: HMs (Sinnoh) + NPCs + Gyms/E4 (Sinnoh)
+- sws_en_Kanto.xml: HMs (Kanto) + NPCs + Gyms/E4 (Kanto)
+- sws_en_Johto.xml: HMs (Johto) + NPCs + Gyms/E4 (Johto)
+- sws_en_Hoenn.xml: HMs (Hoenn) + NPCs + Gyms/E4 (Hoenn)
+
 ## Usage Guide
 
 1. **Clone the repository with submodules:**
