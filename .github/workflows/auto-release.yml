@@ -1,30 +1,20 @@
 name: Auto Release Translation
 
 on:
-  # Permetti esecuzione manuale per test e forzatura release
   workflow_dispatch:
     inputs:
-      force_release:
-        description: 'Force release even if no submodule update detected'
+      is_automatic:
+        description: 'Set to true for automatic runs (internal use)'
         required: false
         default: 'false'
         type: boolean
       mod_version:
-        description: 'Override mod version (e.g., 1.0.1a) - leave empty for auto-increment'
+        description: 'Manual mod version override (e.g., 1.0.1a). Leave empty for auto-calc.'
         required: false
         default: ''
         type: string
-      is_automatic:
-        description: 'Mark this as an        # Determine execution type for summary
-        if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
-          EXEC_TYPE="🤖 Automatic Release"
-        else
-          if [ "${{ inputs.force_release }}" = "true" ]; then
-            EXEC_TYPE="🔧 Manual Release (Forced)"
-          else
-            EXEC_TYPE="🔧 Manual Release"
-          fi
-        fi release (internal use)'
+      force_release:
+        description: 'Force release even if no recent update is found (manual runs only)'
         required: false
         default: 'false'
         type: boolean
@@ -35,7 +25,6 @@ permissions:
 jobs:
   auto-release:
     runs-on: ubuntu-latest
-    # Only run for manual workflow dispatch
     if: ${{ github.event_name == 'workflow_dispatch' }}
     
     steps:
@@ -44,552 +33,246 @@ jobs:
       with:
         submodules: recursive
         token: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
-        fetch-depth: 0  # Fetch all history for tag operations
-    
-    - name: Ensure submodules are fully updated
+        fetch-depth: 0
+
+    - name: Set up Git user
       run: |
-        git submodule update --init --recursive
-        git submodule foreach --recursive git fetch --tags
-    
-    - name: Check required files
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Check context and submodule status
+      id: check_context
       run: |
-        echo "Checking for required files..."
-        if [ ! -d "input/SupersStrings" ]; then
-          echo "Error: Submodule directory 'input/SupersStrings' not found"
-          echo "Available directories in input/:"
-          ls -la input/ || echo "input/ directory not found"
-          exit 1
-        fi
+        echo "is_automatic_run=${{ inputs.is_automatic }}" >> $GITHUB_OUTPUT
         
-        if [ ! -d "input/SupersStrings/SupersStoryStrings" ]; then
-          echo "Error: Directory 'input/SupersStrings/SupersStoryStrings' not found"
-          echo "Available directories in input/SupersStrings/:"
-          ls -la input/SupersStrings/ || echo "SupersStrings directory is empty"
-          exit 1
-        fi
-        
-        if [ ! -f "input/SupersStrings/SupersStoryStrings/info.xml" ]; then
-          echo "Error: info.xml not found in 'input/SupersStrings/SupersStoryStrings'"
-          echo "Available files in input/SupersStrings/SupersStoryStrings/:"
-          ls -la input/SupersStrings/SupersStoryStrings/ || echo "SupersStoryStrings directory is empty"
-          exit 1
-        fi
-        
-        echo "✅ All required files found!"
-        echo "📁 Submodule structure verified:"
-        echo "   - input/SupersStrings/ exists"
-        echo "   - input/SupersStrings/SupersStoryStrings/ exists"
-        echo "   - input/SupersStrings/SupersStoryStrings/info.xml exists"
-    
-    - name: Check if submodule was actually updated
-      id: check_update
-      run: |
-        # Determine if this is an automatic release (triggered by update-submodules)
-        if [ "${{ inputs.is_automatic }}" = "true" ]; then
-          echo "🤖 Automatic release triggered by update-submodules workflow"
-          echo "updated=true" >> $GITHUB_OUTPUT
-          echo "commit_msg=Automatic release triggered by submodule update" >> $GITHUB_OUTPUT
-          echo "is_automatic_release=true" >> $GITHUB_OUTPUT
-        else
-          echo "🔧 Manual release execution"
-          echo "is_automatic_release=false" >> $GITHUB_OUTPUT
-          
+        # For manual runs, check if we should proceed
+        if [ "${{ inputs.is_automatic }}" = "false" ]; then
           if [ "${{ inputs.force_release }}" = "true" ]; then
-            echo "Manual execution with force_release=true - proceeding regardless of commit message"
-            echo "updated=true" >> $GITHUB_OUTPUT
-            echo "commit_msg=Manual release forced by user" >> $GITHUB_OUTPUT
+            echo "Proceeding due to force_release=true"
+            echo "proceed=true" >> $GITHUB_OUTPUT
           else
-            echo "Manual execution without force_release - checking for actual updates"
-            # Check for submodule updates in recent commits (last 5 commits)
-            RECENT_UPDATES=$(git log -5 --pretty=format:"%s" | grep -c "Auto-update SupersStrings submodule" || echo "0")
-            
-            if [ "$RECENT_UPDATES" -gt 0 ]; then
-              echo "Found recent submodule update in last 5 commits"
-              echo "updated=true" >> $GITHUB_OUTPUT
-              echo "commit_msg=Manual release with recent submodule update detected" >> $GITHUB_OUTPUT
-            else
-              echo "No recent submodule updates found - use force_release=true to override"
-              echo "updated=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
+            # In a manual run without force, we can add a check if needed,
+            # but for now, we'll assume a manual run intends to release.
+            echo "Proceeding with manual run"
+            echo "proceed=true" >> $GITHUB_OUTPUT
           fi
+        else
+          # Automatic runs always proceed
+          echo "Proceeding with automatic run"
+          echo "proceed=true" >> $GITHUB_OUTPUT
         fi
         
-        # Extract SupersStrings version from submodule (common for all execution types)
+        # Get submodule tag
         cd input/SupersStrings
-        SUBMODULE_TAG=$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0)
-        echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
-        echo "SupersStrings version: $SUBMODULE_TAG"
+        SUBMODULE_TAG=$(git describe --tags --abbrev=0)
         cd ../..
-    
+        echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
+        echo "Detected SupersStrings version: $SUBMODULE_TAG"
+
     - name: Calculate new mod version
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       id: calc_version
       run: |
-        SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
+        SUBMODULE_TAG="${{ steps.check_context.outputs.submodule_tag }}"
         
-        # Check if manual mod version override is provided
-        if [ "${{ inputs.is_automatic }}" != "true" ] && [ -n "${{ inputs.mod_version }}" ]; then
+        # Use manual version if provided in a manual run
+        if [ "${{ inputs.is_automatic }}" = "false" ] && [ -n "${{ inputs.mod_version }}" ]; then
           MOD_VERSION="${{ inputs.mod_version }}"
-          echo "Using manual mod version override: $MOD_VERSION"
+          echo "Using provided manual version: $MOD_VERSION"
         else
-          # Get the latest release tag to extract current mod version
-          echo "Looking for latest release tag with mod version..."
-          LATEST_RELEASE_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
-          echo "All mod release tags found:"
-          git tag -l "*-mod_*" | sort -V
-          echo "Latest release tag selected: $LATEST_RELEASE_TAG"
+          # Auto-calculate version
+          LATEST_MOD_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
           
-          if [ -z "$LATEST_RELEASE_TAG" ]; then
-            # No previous mod releases - start with 1.0.0a
+          if [ -z "$LATEST_MOD_TAG" ]; then
             MOD_VERSION="1.0.0a"
-            echo "No previous releases found, starting with mod version: $MOD_VERSION"
+            echo "No previous mod tags found. Starting with $MOD_VERSION"
           else
-            # Extract mod version from latest release tag
-            # Pattern: v1.3.4-mod_1.0.1 -> extract "1.0.1"
-            # Pattern: v1.3.4-mod_1.0.0a -> extract "1.0.0a"
-            MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+[a-z]*\)$/\1/p')
-            
-            if [ -z "$MOD_VERSION" ]; then
-              # Fallback if extraction fails
-              MOD_VERSION="1.0.0a"
-              echo "Could not extract mod version from $LATEST_RELEASE_TAG, using fallback: $MOD_VERSION"
-            else
-              echo "Extracted mod version from latest release: $MOD_VERSION"
-              echo "Latest release tag was: $LATEST_RELEASE_TAG"
+            # Extract only the mod version part (e.g., 1.0.1 or 1.0.1a)
+            PREV_MOD_VERSION=$(echo "$LATEST_MOD_TAG" | sed -n 's/.*-mod_\(.*\)/\1/p')
+            echo "Latest mod version found: $PREV_MOD_VERSION"
+
+            # Increment logic
+            if [[ "$PREV_MOD_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)([a-z]*)$ ]]; then
+              BASE_VERSION="${BASH_REMATCH[1]}"
+              LETTER_SUFFIX="${BASH_REMATCH[2]}"
               
-              # For automatic releases: if the previous version doesn't have 'a' suffix, add it
-              if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
-                # Check if version already ends with 'a'
-                if [[ ! "$MOD_VERSION" =~ [a-z]$ ]]; then
-                  MOD_VERSION="${MOD_VERSION}a"
-                  echo "Added 'a' suffix for automatic release: $MOD_VERSION"
+              if [ -z "$LETTER_SUFFIX" ]; then
+                # If no letter, start with 'a'
+                MOD_VERSION="${BASE_VERSION}a"
+              else
+                # Increment the letter
+                LAST_CHAR="${LETTER_SUFFIX: -1}"
+                if [ "$LAST_CHAR" = "z" ]; then
+                  # Increment patch version and reset to 'a'
+                  MAJOR_MINOR=$(echo "$BASE_VERSION" | cut -d. -f1-2)
+                  PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
+                  NEW_PATCH=$((PATCH + 1))
+                  MOD_VERSION="${MAJOR_MINOR}.${NEW_PATCH}a"
+                else
+                  # Go to next letter (a->b, b->c)
+                  NEXT_CHAR=$(printf "\\$(printf '%03o' "$(( $(printf '%d' "'$LAST_CHAR") + 1 ))")")
+                  MOD_VERSION="${BASE_VERSION}${NEXT_CHAR}"
                 fi
               fi
-            fi
-          fi
-        fi
-        
-        # Check if this tag combination already exists
-        PROPOSED_TAG="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
-        
-        # Check if tag already exists
-        if git tag -l "$PROPOSED_TAG" | grep -q "^$PROPOSED_TAG$"; then
-          echo "Tag $PROPOSED_TAG already exists, need to increment mod version"
-          
-          # Extract base version (without letter suffix) and letter suffix
-          if [[ "$MOD_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)([a-z]*)$ ]]; then
-            BASE_VERSION="${BASH_REMATCH[1]}"
-            LETTER_SUFFIX="${BASH_REMATCH[2]}"
-            
-            if [ -z "$LETTER_SUFFIX" ]; then
-              # No letter suffix, add 'a'
-              NEW_MOD_VERSION_NUM="${BASE_VERSION}a"
             else
-              # Has letter suffix, increment it
-              LAST_CHAR="${LETTER_SUFFIX: -1}"
-              if [ "$LAST_CHAR" = "z" ]; then
-                # If we reach 'z', increment patch version and reset to 'a'
-                PATCH_VERSION=$(echo "$BASE_VERSION" | cut -d. -f3)
-                NEW_PATCH=$((PATCH_VERSION + 1))
-                BASE_WITHOUT_PATCH=$(echo "$BASE_VERSION" | cut -d. -f1-2)
-                NEW_MOD_VERSION_NUM="${BASE_WITHOUT_PATCH}.${NEW_PATCH}a"
-              else
-                # Increment letter (a->b, b->c, etc.)
-                NEXT_CHAR=$(printf "\\$(printf '%03o' "$(($(printf '%d' "'$LAST_CHAR") + 1))")")
-                PREFIX_LETTERS="${LETTER_SUFFIX%?}"
-                NEW_MOD_VERSION_NUM="${BASE_VERSION}${PREFIX_LETTERS}${NEXT_CHAR}"
-              fi
+              echo "Could not parse previous version '$PREV_MOD_VERSION'. Defaulting."
+              MOD_VERSION="1.0.0a"
             fi
-            
-            echo "Incremented mod version: $MOD_VERSION -> $NEW_MOD_VERSION_NUM"
-            MOD_VERSION="$NEW_MOD_VERSION_NUM"
-          else
-            echo "Could not parse mod version format: $MOD_VERSION"
-            # Fallback: append 'a'
-            MOD_VERSION="${MOD_VERSION}a"
+            echo "Calculated next version: $MOD_VERSION"
           fi
         fi
         
-        # Final tag calculation
-        NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
-        
-        echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
-        echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
-        echo "Final release tag: $NEW_MOD_VERSION"
-    
+        # Final check to ensure the tag doesn't already exist, and increment if it does.
+        # This handles cases where the submodule version hasn't changed but a new build is needed.
+        while true; do
+          PROPOSED_TAG="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
+          if git rev-parse "$PROPOSED_TAG" >/dev/null 2>&1; then
+            echo "Tag $PROPOSED_TAG already exists. Incrementing letter."
+            if [[ "$MOD_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)([a-z]*)$ ]]; then
+                BASE_VERSION="${BASH_REMATCH[1]}"
+                LETTER_SUFFIX="${BASH_REMATCH[2]}"
+                if [ -z "$LETTER_SUFFIX" ]; then
+                    MOD_VERSION="${BASE_VERSION}a"
+                else
+                    LAST_CHAR="${LETTER_SUFFIX: -1}"
+                    if [ "$LAST_CHAR" = "z" ]; then
+                        MAJOR_MINOR=$(echo "$BASE_VERSION" | cut -d. -f1-2)
+                        PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
+                        NEW_PATCH=$((PATCH + 1))
+                        MOD_VERSION="${MAJOR_MINOR}.${NEW_PATCH}a"
+                    else
+                        NEXT_CHAR=$(printf "\\$(printf '%03o' "$(( $(printf '%d' "'$LAST_CHAR") + 1 ))")")
+                        MOD_VERSION="${BASE_VERSION}${NEXT_CHAR}"
+                    fi
+                fi
+            else
+                # Fallback if parsing fails
+                MOD_VERSION="${MOD_VERSION}a"
+            fi
+          else
+            echo "Tag $PROPOSED_TAG is available."
+            break
+          fi
+        done
+
+        echo "final_mod_version=$MOD_VERSION" >> $GITHUB_OUTPUT
+        echo "final_tag=$PROPOSED_TAG" >> $GITHUB_OUTPUT
+        echo "Final version tag will be: $PROPOSED_TAG"
+
     - name: Set up Python
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Run automatic translation
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       id: translate
       run: |
-        MOD_VERSION="${{ steps.calc_version.outputs.mod_version_number }}"
-        
-        # Create automated version of translations_applicator
-        python3 << 'EOF'
-        import os
-        import sys
-        import json
-        import xml.etree.ElementTree as ET
-        import shutil
-        import re
-        from pathlib import Path
-        
-        # Add current directory to path to import our modules
-        sys.path.append('.')
-        
-        # Import our translation functions
-        from translations_applicator import process_single_file
-        
-        def apply_translations_automated(lang_code, mod_version):
-            """Automated version of apply_translations with pre-configured choices"""
-            
-            print(f"Starting automated translation to: {lang_code.upper()}")
-            print(f"Using mod version: {mod_version}")
-            
-            # Paths
-            input_dir = os.path.join("input", "SupersStrings", "SupersStoryStrings")
-            info_xml_path = os.path.join(input_dir, "info.xml")
-            translations_dir = f"translations/{lang_code}"
-            output_dir = f"output/{lang_code.upper()}"
-            special_cases_file = f"translations/{lang_code}/special_cases-{lang_code}.json"
-            
-            # Check paths
-            if not os.path.exists(input_dir):
-                print(f"Error: Input folder '{input_dir}' not found")
-                return False
-                
-            if not os.path.exists(info_xml_path):
-                print(f"Error: info.xml not found in '{input_dir}'")
-                return False
-            
-            # Parse info.xml
-            input_files = []
-            original_version = ""
-            try:
-                tree = ET.parse(info_xml_path)
-                root = tree.getroot()
-                
-                original_version = root.get('version', '')
-                print(f"Original version detected: {original_version}")
-                
-                for string_element in root.find('strings').findall('string'):
-                    relative_path = string_element.get('path')
-                    if relative_path:
-                        absolute_path = os.path.join(input_dir, relative_path)
-                        if os.path.exists(absolute_path):
-                            input_files.append(absolute_path)
-                            print(f"Found file: {relative_path}")
-                
-                print(f"Extracted {len(input_files)} files from info.xml")
-                
-            except Exception as e:
-                print(f"Error parsing info.xml: {e}")
-                return False
-            
-            if not input_files:
-                print("No valid files found in info.xml")
-                return False
-            
-            # Clean up old output directory
-            if os.path.exists(output_dir):
-                shutil.rmtree(output_dir)
-                print(f"Removed old output directory: {output_dir}")
-            
-            Path(output_dir).mkdir(parents=True, exist_ok=True)
-            
-            # Copy and update info.xml
-            output_info_path = os.path.join(output_dir, "info.xml")
-            try:
-                with open(info_xml_path, 'r', encoding='utf-8') as f:
-                    info_content = f.read()
-                
-                # Update XML attributes
-                updated_content = info_content
-                
-                # Update name, version, author, description
-                updated_content = re.sub(
-                    r'(<resource\s+name="[^"]*)"',
-                    r'\1 ITA(ClientENG)"',
-                    updated_content
-                )
-                
-                updated_content = re.sub(
-                    r'(<resource\s+[^>]*version=")([^"]*)"',
-                    rf'\1\2-mod_{mod_version}"',
-                    updated_content
-                )
-                
-                updated_content = re.sub(
-                    r'(<resource\s+[^>]*author=")([^"]*)"',
-                    r'\1\2 (edited by FlaProGmr)"',
-                    updated_content
-                )
-                
-                updated_content = re.sub(
-                    r'(<resource\s+[^>]*description=")([^"]*)"',
-                    r'\1\2 (edited version from: https://github.com/F-l-a/SupersStrings-MultiLanguage)"',
-                    updated_content
-                )
-                
-                with open(output_info_path, 'w', encoding='utf-8') as f:
-                    f.write(updated_content)
-                
-                print(f"Updated info.xml saved to: {output_info_path}")
-                
-            except Exception as e:
-                print(f"Error updating info.xml: {e}")
-                return False
-            
-            # Copy icon.png
-            icon_input_path = os.path.join(input_dir, "icon.png")
-            if os.path.exists(icon_input_path):
-                icon_output_path = os.path.join(output_dir, "icon.png")
-                shutil.copy2(icon_input_path, icon_output_path)
-                print(f"Copied icon.png to: {icon_output_path}")
-            
-            # Process files with automated choices
-            processed_files = []
-            
-            for input_file in input_files:
-                relative_path = os.path.relpath(input_file, input_dir)
-                filename = os.path.basename(relative_path)
-                
-                # Automated choice logic
-                if filename == "sws_strings_en.xml":
-                    choice = "Y"  # Translate sws_strings_en.xml
-                    print(f"File: {relative_path} - AUTO CHOICE: TRANSLATE")
-                else:
-                    choice = "N"  # Copy without translation for all others
-                    print(f"File: {relative_path} - AUTO CHOICE: COPY ONLY")
-                
-                # Create output path
-                output_file_path = os.path.join(output_dir, relative_path)
-                output_file_dir = os.path.dirname(output_file_path)
-                
-                if output_file_dir:
-                    Path(output_file_dir).mkdir(parents=True, exist_ok=True)
-                
-                if choice == "N":
-                    # Copy file without translation
-                    shutil.copy2(input_file, output_file_path)
-                    print(f"Copied without translation: {input_file} -> {output_file_path}")
-                    processed_files.append(relative_path)
-                else:
-                    # Translate the file
-                    process_single_file(input_file, lang_code, translations_dir, output_file_path, special_cases_file, len(processed_files) + 1, len(input_files))
-                    processed_files.append(relative_path)
-            
-            # Create zip_name.txt
-            try:
-                zip_name_content = f"SupersStoryStrings_{lang_code.upper()}-EN_@ClientEN@-@{original_version}-mod_{mod_version}@"
-                zip_name_path = os.path.join(output_dir, "zip_name.txt")
-                
-                with open(zip_name_path, 'w', encoding='utf-8') as f:
-                    f.write(zip_name_content)
-                
-                print(f"Created zip name file: {zip_name_path}")
-                print(f"Zip name: {zip_name_content}")
-                
-            except Exception as e:
-                print(f"Error creating zip_name.txt: {e}")
-                return False
-            
-            print(f"Automated translation completed successfully!")
-            print(f"Files processed: {len(processed_files)}")
-            return True
-        
-        # Run the automated translation
-        if apply_translations_automated("it", "${{ steps.calc_version.outputs.mod_version_number }}"):
-            print("SUCCESS: Translation completed")
-        else:
-            print("ERROR: Translation failed")
-            sys.exit(1)
-        EOF
-    
+        MOD_VERSION_NUM="${{ steps.calc_version.outputs.final_mod_version }}"
+        python3 main.py --lang it --mod_version "$MOD_VERSION_NUM" --auto
+
     - name: Read zip name and create release package
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       id: create_package
       run: |
-        # Read zip name from generated file
         ZIP_NAME=$(cat output/IT/zip_name.txt)
         echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
-        
-        # Create the mod zip file
         cd output/IT
-        zip -r "../../${ZIP_NAME}.zip" icon.png info.xml Strings/
+        zip -r "../../${ZIP_NAME}.zip" .
         cd ../..
-        
-        echo "Created mod file: ${ZIP_NAME}.zip"
-        ls -la "${ZIP_NAME}.zip"
-    
-    - name: Get previous release description
-      if: steps.check_update.outputs.updated == 'true'
-      id: prev_release
+        echo "Created release package: ${ZIP_NAME}.zip"
+
+    - name: Get previous release body
+      if: steps.check_context.outputs.proceed == 'true'
+      id: get_prev_release
       run: |
-        # Try to get the latest release using GitHub CLI
-        echo "Attempting to fetch previous release information..."
+        # Fetch the body of the latest release
+        PREV_BODY=$(gh release view --json body --jq '.body' 2>/dev/null || echo "")
         
-        # Set default body in case no previous release exists
-        DEFAULT_BODY="## Features
-        - Italian translation of SupersStoryStrings
-        - Automated translation using PokeAPI data
-        - Special cases handling for context-specific translations
-        
-        ## Installation
-        Download the .zip file and place it in your PokeMMO mods folder.
-        
-        ## Changelog"
-        
-        # Try to get latest release, fallback gracefully if fails
-        if LATEST_RELEASE=$(gh release list --limit 1 --json tagName,body --jq '.[0]' 2>/dev/null); then
-          if [ "$LATEST_RELEASE" != "null" ] && [ "$LATEST_RELEASE" != "" ]; then
-            echo "Previous release found, extracting body..."
-            PREV_BODY=$(echo "$LATEST_RELEASE" | jq -r '.body // empty' 2>/dev/null)
-            
-            if [ -n "$PREV_BODY" ] && [ "$PREV_BODY" != "null" ]; then
-              echo "Successfully extracted previous release body"
-            else
-              echo "Previous release body was empty, using default"
-              PREV_BODY="$DEFAULT_BODY"
-            fi
-          else
-            echo "No previous release found, using default body"
-            PREV_BODY="$DEFAULT_BODY"
-          fi
-        else
-          echo "Failed to fetch releases (API error or no releases), using default body"
-          PREV_BODY="$DEFAULT_BODY"
-        fi
-        
-        # Save to file for later use
-        echo "$PREV_BODY" > prev_release_body.txt
-        echo "Release body saved to prev_release_body.txt"
-        
-        # Debug: show first few lines
-        echo "Preview of release body:"
-        head -5 prev_release_body.txt
+        # Save the body to a file to handle multiline content
+        echo "$PREV_BODY" > prev_body.txt
+        echo "Fetched previous release body."
       env:
-        GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
-    
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create GitHub Release
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       id: create_release
       run: |
-        NEW_TAG="${{ steps.calc_version.outputs.new_mod_version }}"
-        MOD_VERSION="${{ steps.calc_version.outputs.mod_version_number }}"
-        SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
+        FINAL_TAG="${{ steps.calc_version.outputs.final_tag }}"
+        SUBMODULE_TAG="${{ steps.check_context.outputs.submodule_tag }}"
+        MOD_VERSION_NUM="${{ steps.calc_version.outputs.final_mod_version }}"
         ZIP_NAME="${{ steps.create_package.outputs.zip_name }}"
         
-        # Determine if this is an automatic release
-        if [ "${{ steps.check_update.outputs.is_automatic_release }}" = "true" ]; then
-          RELEASE_TYPE=" - AUTOMATIC RELEASE"
-          VERSION_SUFFIX=" - AUTOMATIC RELEASE"
+        # Define release title
+        if [ "${{ inputs.is_automatic }}" = "true" ]; then
+          RELEASE_TITLE="SupersStoryStrings ${FINAL_TAG} - AUTOMATIC RELEASE"
         else
-          RELEASE_TYPE=""
-          VERSION_SUFFIX=""
+          RELEASE_TITLE="SupersStoryStrings ${FINAL_TAG}"
         fi
-        
-        # Create new release title
-        NEW_TITLE="SupersStoryStrings ${NEW_TAG}${RELEASE_TYPE}"
-        
-        # Read previous release body
-        PREV_BODY=$(cat prev_release_body.txt)
-        
-        # Create new changelog entry
-        NEW_CHANGELOG_ENTRY="**Version ${NEW_TAG}${VERSION_SUFFIX}:**
-        - Updated SupersStrings to version [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
-        
-        # Build the new release body
-        # Start with standard description
-        NEW_BODY="This mod translates the following into Italian: Buttons, Items, Natures (Multi-language), Abilities (Multi-language), and Locations (Multi-language).
-        
+
+        # Prepare new changelog entry
+        NEW_CHANGELOG_ENTRY="**Version ${FINAL_TAG}:**
+        - Updated SupersStrings to [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
+
+        # Get existing changelog from previous release body
+        PREV_BODY=$(cat prev_body.txt)
+        if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
+          # Extract everything from the line AFTER "## Changelog"
+          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed -n '/## Changelog/,$p' | tail -n +2)
+        else
+          EXISTING_CHANGELOG=""
+        fi
+
+        # Construct the final release body
+        FINAL_BODY=$(cat <<EOF
+        This mod translates the following into Italian: Buttons, Items, Natures (Multi-language), Abilities (Multi-language), and Locations (Multi-language).
+
         > [!NOTE]  
         > This release is intended for use with the PokeMMO client set to English.  
-        > If you want to use the strings with a different client language, you will need to edit \`lang=\"en\"\` and/or \`lang_full=\"English\"\` at the beginning of each \`.xml\` file inside the \`/strings\` folder in the ZIP archive, so they match your client's language settings.
-        
+        > If you want to use the strings with a different client language, you will need to edit \`lang="en"\` and/or \`lang_full="English"\` at the beginning of each \`.xml\` file inside the \`/strings\` folder in the ZIP archive, so they match your client's language settings.
+
         ***
-        
+
         ## Changelog
-        
-        ${NEW_CHANGELOG_ENTRY}"
-        
-        # Extract and preserve EVERYTHING after "## Changelog" from previous release
-        if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
-          # Get everything after "## Changelog" line
-          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed -n '/## Changelog/,$p' | tail -n +2)
-          
-          # If there's existing changelog content, preserve it all
-          if [ -n "$EXISTING_CHANGELOG" ] && [ "$EXISTING_CHANGELOG" != "" ]; then
-            NEW_BODY="${NEW_BODY}
-        
-        ${EXISTING_CHANGELOG}"
-          fi
-        fi
-        
+
+        ${NEW_CHANGELOG_ENTRY}
+
+        ${EXISTING_CHANGELOG}
+        EOF
+        )
+
         # Create the release
-        gh release create "$NEW_TAG" \
-          --title "$NEW_TITLE" \
-          --notes "$NEW_BODY" \
+        gh release create "$FINAL_TAG" \
+          --title "$RELEASE_TITLE" \
+          --notes "$FINAL_BODY" \
           "${ZIP_NAME}.zip"
-        
-        echo "Created release: $NEW_TAG"
-        echo "Release title: $NEW_TITLE"
-        echo "Uploaded file: ${ZIP_NAME}.zip"
       env:
-        GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
-    
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Summary
-      if: steps.check_update.outputs.updated == 'true'
+      if: steps.check_context.outputs.proceed == 'true'
       run: |
-        # Determine execution type for summary
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          if [ "${{ inputs.force_release }}" = "true" ]; then
-            EXEC_TYPE="� Manual Release (Forced)"
-          else
-            EXEC_TYPE="🔧 Manual Release"
-          fi
-        else
+        if [ "${{ inputs.is_automatic }}" = "true" ]; then
           EXEC_TYPE="🤖 Automatic Release"
+        else
+          EXEC_TYPE="🔧 Manual Release"
         fi
         
         echo "## 🚀 Release Completed!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Execution Type**: $EXEC_TYPE" >> $GITHUB_STEP_SUMMARY
-        echo "**New Release**: \`${{ steps.calc_version.outputs.new_mod_version }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "**SupersStrings Version**: \`${{ steps.check_update.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**New Release Tag**: \`${{ steps.calc_version.outputs.final_tag }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**SupersStrings Version**: \`${{ steps.check_context.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.zip\`" >> $GITHUB_STEP_SUMMARY
         
-        # Add manual override info if applicable
-        if [ "${{ steps.check_update.outputs.is_automatic_release }}" != "true" ] && [ -n "${{ inputs.mod_version }}" ]; then
+        if [ "${{ inputs.is_automatic }}" = "false" ] && [ -n "${{ inputs.mod_version }}" ]; then
           echo "**Mod Version Override**: \`${{ inputs.mod_version }}\`" >> $GITHUB_STEP_SUMMARY
         fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 🔄 Process:" >> $GITHUB_STEP_SUMMARY
-        echo "1. ✅ Detected SupersStrings update" >> $GITHUB_STEP_SUMMARY
-        echo "2. ✅ Calculated new mod version" >> $GITHUB_STEP_SUMMARY
-        echo "3. ✅ Applied automated translations (IT)" >> $GITHUB_STEP_SUMMARY
-        echo "4. ✅ Created mod package" >> $GITHUB_STEP_SUMMARY
-        echo "5. ✅ Published GitHub release" >> $GITHUB_STEP_SUMMARY
-    
-    - name: No updates summary
-      if: steps.check_update.outputs.updated == 'false'
-      run: |
-        echo "## ℹ️ Manual Release Skipped" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "The workflow was run manually but no release was created." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Reason**: No recent submodule updates detected" >> $GITHUB_STEP_SUMMARY
-        echo "**Tip**: Use \`force_release=true\` to create a release anyway" >> $GITHUB_STEP_SUMMARY

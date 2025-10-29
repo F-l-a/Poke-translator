@@ -182,9 +182,7 @@ jobs:
       if: steps.update.outputs.has_updates == 'true'
       run: |
         echo "🚀 Triggering automatic release workflow..."
-        gh workflow run auto-release.yml \
-          --field force_release=true \
-          --field is_automatic=true
+        gh workflow run auto-release.yml --field is_automatic=true
         
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "---" >> $GITHUB_STEP_SUMMARY  
