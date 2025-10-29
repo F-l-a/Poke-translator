@@ -176,7 +176,7 @@ jobs:
       id: translate
       run: |
         MOD_VERSION_NUM="${{ steps.calc_version.outputs.final_mod_version }}"
-        python3 main.py --lang it --mod_version "$MOD_VERSION_NUM" --auto
+        python3 automated_translation.py --lang_code it --mod_version "$MOD_VERSION_NUM"
 
     - name: Read zip name and create release package
       if: steps.check_context.outputs.proceed == 'true'
