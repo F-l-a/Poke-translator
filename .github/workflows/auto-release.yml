@@ -331,14 +331,11 @@ jobs:
       if: steps.check_update.outputs.updated == 'true'
       id: prev_release
       run: |
-        # Get the latest release
-        LATEST_RELEASE=$(gh release list --limit 1 --json tagName,body --jq '.[0]')
+        # Try to get the latest release using GitHub CLI
+        echo "Attempting to fetch previous release information..."
         
-        if [ "$LATEST_RELEASE" != "null" ]; then
-          PREV_BODY=$(echo "$LATEST_RELEASE" | jq -r '.body')
-          echo "Previous release body found"
-        else
-          PREV_BODY="## Features
+        # Set default body in case no previous release exists
+        DEFAULT_BODY="## Features
         - Italian translation of SupersStoryStrings
         - Automated translation using PokeAPI data
         - Special cases handling for context-specific translations
@@ -347,13 +344,37 @@ jobs:
         Download the .mod file and place it in your PokeMMO mods folder.
         
         ## Changelog"
-          echo "No previous release found, using default body"
+        
+        # Try to get latest release, fallback gracefully if fails
+        if LATEST_RELEASE=$(gh release list --limit 1 --json tagName,body --jq '.[0]' 2>/dev/null); then
+          if [ "$LATEST_RELEASE" != "null" ] && [ "$LATEST_RELEASE" != "" ]; then
+            echo "Previous release found, extracting body..."
+            PREV_BODY=$(echo "$LATEST_RELEASE" | jq -r '.body // empty' 2>/dev/null)
+            
+            if [ -n "$PREV_BODY" ] && [ "$PREV_BODY" != "null" ]; then
+              echo "Successfully extracted previous release body"
+            else
+              echo "Previous release body was empty, using default"
+              PREV_BODY="$DEFAULT_BODY"
+            fi
+          else
+            echo "No previous release found, using default body"
+            PREV_BODY="$DEFAULT_BODY"
+          fi
+        else
+          echo "Failed to fetch releases (API error or no releases), using default body"
+          PREV_BODY="$DEFAULT_BODY"
         fi
         
         # Save to file for later use
         echo "$PREV_BODY" > prev_release_body.txt
+        echo "Release body saved to prev_release_body.txt"
+        
+        # Debug: show first few lines
+        echo "Preview of release body:"
+        head -5 prev_release_body.txt
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
     
     - name: Create GitHub Release
       if: steps.check_update.outputs.updated == 'true'
@@ -396,7 +417,7 @@ jobs:
         echo "Created release: $NEW_TAG"
         echo "Uploaded file: ${ZIP_NAME}.mod"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
     
     - name: Summary
       if: steps.check_update.outputs.updated == 'true'
