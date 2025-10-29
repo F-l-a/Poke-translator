@@ -425,11 +425,11 @@ jobs:
         
         # Create the mod zip file
         cd output/IT
-        zip -r "../../${ZIP_NAME}.mod" icon.png info.xml Strings/
+        zip -r "../../${ZIP_NAME}.zip" icon.png info.xml Strings/
         cd ../..
         
-        echo "Created mod file: ${ZIP_NAME}.mod"
-        ls -la "${ZIP_NAME}.mod"
+        echo "Created mod file: ${ZIP_NAME}.zip"
+        ls -la "${ZIP_NAME}.zip"
     
     - name: Get previous release description
       if: steps.check_update.outputs.updated == 'true'
@@ -445,7 +445,7 @@ jobs:
         - Special cases handling for context-specific translations
         
         ## Installation
-        Download the .mod file and place it in your PokeMMO mods folder.
+        Download the .zip file and place it in your PokeMMO mods folder.
         
         ## Changelog"
         
@@ -554,11 +554,11 @@ jobs:
         gh release create "$NEW_TAG" \
           --title "$NEW_TITLE" \
           --notes "$NEW_BODY" \
-          "${ZIP_NAME}.mod"
+          "${ZIP_NAME}.zip"
         
         echo "Created release: $NEW_TAG"
         echo "Release title: $NEW_TITLE"
-        echo "Uploaded file: ${ZIP_NAME}.mod"
+        echo "Uploaded file: ${ZIP_NAME}.zip"
       env:
         GH_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
     
@@ -581,7 +581,7 @@ jobs:
         echo "**Execution Type**: $EXEC_TYPE" >> $GITHUB_STEP_SUMMARY
         echo "**New Release**: \`${{ steps.calc_version.outputs.new_mod_version }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**SupersStrings Version**: \`${{ steps.check_update.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.mod\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.zip\`" >> $GITHUB_STEP_SUMMARY
         
         # Add manual override info if applicable
         if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mod_version }}" ]; then
