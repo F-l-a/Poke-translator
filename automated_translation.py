@@ -310,18 +310,17 @@ def test_version_calculation():
         print()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "test":
-        test_version_calculation()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run automated translation for PokeMMO strings.")
+    parser.add_argument('--lang_code', type=str, required=True, help='Language code for translation (e.g., "it").')
+    parser.add_argument('--mod_version', type=str, required=True, help='The version for the mod (e.g., "1.2.3a").')
+    
+    args = parser.parse_args()
+
+    if apply_translations_automated(args.lang_code, args.mod_version):
+        print("✅ Automated translation process completed successfully!")
+        sys.exit(0)
     else:
-        # Example usage
-        print("Automated Translation Script")
-        print("=" * 50)
-        
-        # Test version calculation
-        test_version_calculation()
-        
-        # Example automated translation (uncomment to test)
-        # if apply_translations_automated("it", "1.0.1a"):
-        #     print("✅ Automated translation completed!")
-        # else:
-        #     print("❌ Automated translation failed!")
+        print("❌ Automated translation process failed.")
+        sys.exit(1)
