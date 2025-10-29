@@ -131,7 +131,11 @@ jobs:
           echo "Using manual mod version override: $MOD_VERSION"
         else
           # Get the latest release tag to extract current mod version
+          echo "Looking for latest release tag with mod version..."
           LATEST_RELEASE_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
+          echo "All mod release tags found:"
+          git tag -l "*-mod_*" | sort -V
+          echo "Latest release tag selected: $LATEST_RELEASE_TAG"
           
           if [ -z "$LATEST_RELEASE_TAG" ]; then
             # No previous mod releases - start with 1.0.0a
@@ -139,8 +143,9 @@ jobs:
             echo "No previous releases found, starting with mod version: $MOD_VERSION"
           else
             # Extract mod version from latest release tag
+            # Pattern: v1.3.4-mod_1.0.1 -> extract "1.0.1"
             # Pattern: v1.3.4-mod_1.0.0a -> extract "1.0.0a"
-            MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+a\?\)$/\1/p')
+            MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+[a-z]*\)$/\1/p')
             
             if [ -z "$MOD_VERSION" ]; then
               # Fallback if extraction fails
@@ -148,16 +153,67 @@ jobs:
               echo "Could not extract mod version from $LATEST_RELEASE_TAG, using fallback: $MOD_VERSION"
             else
               echo "Extracted mod version from latest release: $MOD_VERSION"
+              echo "Latest release tag was: $LATEST_RELEASE_TAG"
+              
+              # For automatic releases: if the previous version doesn't have 'a' suffix, add it
+              if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+                # Check if version already ends with 'a'
+                if [[ ! "$MOD_VERSION" =~ [a-z]$ ]]; then
+                  MOD_VERSION="${MOD_VERSION}a"
+                  echo "Added 'a' suffix for automatic release: $MOD_VERSION"
+                fi
+              fi
             fi
           fi
         fi
         
-        # New tag uses same mod version with new submodule tag
+        # Check if this tag combination already exists
+        PROPOSED_TAG="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
+        
+        # Check if tag already exists
+        if git tag -l "$PROPOSED_TAG" | grep -q "^$PROPOSED_TAG$"; then
+          echo "Tag $PROPOSED_TAG already exists, need to increment mod version"
+          
+          # Extract base version (without letter suffix) and letter suffix
+          if [[ "$MOD_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)([a-z]*)$ ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+            LETTER_SUFFIX="${BASH_REMATCH[2]}"
+            
+            if [ -z "$LETTER_SUFFIX" ]; then
+              # No letter suffix, add 'a'
+              NEW_MOD_VERSION_NUM="${BASE_VERSION}a"
+            else
+              # Has letter suffix, increment it
+              LAST_CHAR="${LETTER_SUFFIX: -1}"
+              if [ "$LAST_CHAR" = "z" ]; then
+                # If we reach 'z', increment patch version and reset to 'a'
+                PATCH_VERSION=$(echo "$BASE_VERSION" | cut -d. -f3)
+                NEW_PATCH=$((PATCH_VERSION + 1))
+                BASE_WITHOUT_PATCH=$(echo "$BASE_VERSION" | cut -d. -f1-2)
+                NEW_MOD_VERSION_NUM="${BASE_WITHOUT_PATCH}.${NEW_PATCH}a"
+              else
+                # Increment letter (a->b, b->c, etc.)
+                NEXT_CHAR=$(printf "\\$(printf '%03o' "$(($(printf '%d' "'$LAST_CHAR") + 1))")")
+                PREFIX_LETTERS="${LETTER_SUFFIX%?}"
+                NEW_MOD_VERSION_NUM="${BASE_VERSION}${PREFIX_LETTERS}${NEXT_CHAR}"
+              fi
+            fi
+            
+            echo "Incremented mod version: $MOD_VERSION -> $NEW_MOD_VERSION_NUM"
+            MOD_VERSION="$NEW_MOD_VERSION_NUM"
+          else
+            echo "Could not parse mod version format: $MOD_VERSION"
+            # Fallback: append 'a'
+            MOD_VERSION="${MOD_VERSION}a"
+          fi
+        fi
+        
+        # Final tag calculation
         NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
         
         echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
         echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
-        echo "Calculated new release tag: $NEW_MOD_VERSION"
+        echo "Final release tag: $NEW_MOD_VERSION"
     
     - name: Set up Python
       if: steps.check_update.outputs.updated == 'true'
