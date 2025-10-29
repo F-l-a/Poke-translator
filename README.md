@@ -1,3 +1,4 @@
+[![Auto Release Translation](https://github.com/F-l-a/Poke-translator/actions/workflows/auto-release.yml/badge.svg)](https://github.com/F-l-a/Poke-translator/actions/workflows/auto-release.yml)
 # Poke-translator
 A CLI tool in Python that generates multilingual JSON dictionaries using [PokeAPI](https://pokeapi.co) and applies translations to [SupersStrings](https://github.com/superworldsun/SupersStrings) files via key-value matching.
 Italian translations are already present in this repository, but other languages are supported via PokeAPI.

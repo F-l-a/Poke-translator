@@ -27,8 +27,8 @@ permissions:
 jobs:
   auto-release:
     runs-on: ubuntu-latest
-    # Run if: automatic trigger succeeded OR manual trigger
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Run if: manual trigger OR automatic trigger with actual submodule update
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_commit.message && contains(github.event.workflow_run.head_commit.message, 'Auto-update SupersStrings submodule')) }}
     
     steps:
     - name: Checkout repository with submodules
