@@ -1,12 +1,20 @@
 # Poke-translator
 A CLI tool in Python that generates multilingual JSON dictionaries using [PokeAPI](https://pokeapi.co) and applies translations to [SupersStrings](https://github.com/superworldsun/SupersStrings) files via key-value matching.
 Italian translations are already present in this repository, but other languages are supported via PokeAPI.
+
 ## Usage Guide
 
-1. **Clone the repository:**
+1. **Clone the repository with submodules:**
    ```bash
-   git clone https://github.com/F-l-a/Poke-translator
+   git clone --recursive https://github.com/F-l-a/Poke-translator
    cd Poke-translator
+   ```
+   
+   **Note:** The `--recursive` flag is important to automatically download the SupersStrings dependency.
+   
+   If you already cloned without `--recursive`, you can initialize the submodule with:
+   ```bash
+   git submodule update --init --recursive
    ```
 
 2. **Set up Python environment and install dependencies:**
@@ -16,9 +24,9 @@ Italian translations are already present in this repository, but other languages
    pip install -r requirements.txt
    ```
 
-3. **Add input files:**
-   - Download [SupersStrings](https://github.com/superworldsun/SupersStrings) files (specifically `sws_strings_en.xml`)
-   - Place them in the `./input` folder
+3. **Input files are automatically available:**
+   - The [SupersStrings](https://github.com/superworldsun/SupersStrings) files are automatically downloaded as a Git submodule
+   - The tool will use files from `./input/SupersStrings/SupersStoryStrings/` automatically
 
 4. **Run the translator:**
    ```bash

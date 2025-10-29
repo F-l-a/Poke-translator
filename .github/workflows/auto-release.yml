@@ -1,0 +1,422 @@
+name: Auto Release Translation
+
+on:
+  workflow_run:
+    workflows: ["Update Submodules"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
+        fetch-depth: 0  # Fetch all history for tag operations
+    
+    - name: Ensure submodules are fully updated
+      run: |
+        git submodule update --init --recursive
+        git submodule foreach --recursive git fetch --tags
+    
+    - name: Check required files
+      run: |
+        echo "Checking for required files..."
+        if [ ! -d "input/SupersStrings" ]; then
+          echo "Error: Submodule directory 'input/SupersStrings' not found"
+          echo "Available directories in input/:"
+          ls -la input/ || echo "input/ directory not found"
+          exit 1
+        fi
+        
+        if [ ! -d "input/SupersStrings/SupersStoryStrings" ]; then
+          echo "Error: Directory 'input/SupersStrings/SupersStoryStrings' not found"
+          echo "Available directories in input/SupersStrings/:"
+          ls -la input/SupersStrings/ || echo "SupersStrings directory is empty"
+          exit 1
+        fi
+        
+        if [ ! -f "input/SupersStrings/SupersStoryStrings/info.xml" ]; then
+          echo "Error: info.xml not found in 'input/SupersStrings/SupersStoryStrings'"
+          echo "Available files in input/SupersStrings/SupersStoryStrings/:"
+          ls -la input/SupersStrings/SupersStoryStrings/ || echo "SupersStoryStrings directory is empty"
+          exit 1
+        fi
+        
+        echo "✅ All required files found!"
+        echo "📁 Submodule structure verified:"
+        echo "   - input/SupersStrings/ exists"
+        echo "   - input/SupersStrings/SupersStoryStrings/ exists"
+        echo "   - input/SupersStrings/SupersStoryStrings/info.xml exists"
+    
+    - name: Check if submodule was actually updated
+      id: check_update
+      run: |
+        # Check if the last commit was a submodule update
+        LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+        
+        if [[ "$LAST_COMMIT_MSG" == *"Auto-update SupersStrings submodule"* ]]; then
+          echo "updated=true" >> $GITHUB_OUTPUT
+          echo "commit_msg=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
+          
+          # Extract SupersStrings version from submodule
+          cd input/SupersStrings
+          SUBMODULE_TAG=$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0)
+          echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
+          echo "SupersStrings version: $SUBMODULE_TAG"
+          cd ../..
+        else
+          echo "updated=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Calculate new mod version
+      if: steps.check_update.outputs.updated == 'true'
+      id: calc_version
+      run: |
+        SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
+        
+        # Get the latest release tag to extract current mod version
+        LATEST_RELEASE_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
+        
+        if [ -z "$LATEST_RELEASE_TAG" ]; then
+          # No previous mod releases - start with 1.0.0a
+          MOD_VERSION="1.0.0a"
+          echo "No previous releases found, starting with mod version: $MOD_VERSION"
+        else
+          # Extract mod version from latest release tag
+          # Pattern: v1.3.4-mod_1.0.0a -> extract "1.0.0a"
+          MOD_VERSION=$(echo "$LATEST_RELEASE_TAG" | sed -n 's/.*-mod_\([0-9]\+\.[0-9]\+\.[0-9]\+a\?\)$/\1/p')
+          
+          if [ -z "$MOD_VERSION" ]; then
+            # Fallback if extraction fails
+            MOD_VERSION="1.0.0a"
+            echo "Could not extract mod version from $LATEST_RELEASE_TAG, using fallback: $MOD_VERSION"
+          else
+            echo "Extracted mod version from latest release: $MOD_VERSION"
+          fi
+        fi
+        
+        # New tag uses same mod version with new submodule tag
+        NEW_MOD_VERSION="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
+        
+        echo "new_mod_version=$NEW_MOD_VERSION" >> $GITHUB_OUTPUT
+        echo "mod_version_number=$MOD_VERSION" >> $GITHUB_OUTPUT
+        echo "Calculated new release tag: $NEW_MOD_VERSION"
+    
+    - name: Set up Python
+      if: steps.check_update.outputs.updated == 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      if: steps.check_update.outputs.updated == 'true'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run automatic translation
+      if: steps.check_update.outputs.updated == 'true'
+      id: translate
+      run: |
+        MOD_VERSION="${{ steps.calc_version.outputs.mod_version_number }}"
+        
+        # Create automated version of translations_applicator
+        python3 << 'EOF'
+        import os
+        import sys
+        import json
+        import xml.etree.ElementTree as ET
+        import shutil
+        import re
+        from pathlib import Path
+        
+        # Add current directory to path to import our modules
+        sys.path.append('.')
+        
+        # Import our translation functions
+        from translations_applicator import process_single_file
+        
+        def apply_translations_automated(lang_code, mod_version):
+            """Automated version of apply_translations with pre-configured choices"""
+            
+            print(f"Starting automated translation to: {lang_code.upper()}")
+            print(f"Using mod version: {mod_version}")
+            
+            # Paths
+            input_dir = os.path.join("input", "SupersStrings", "SupersStoryStrings")
+            info_xml_path = os.path.join(input_dir, "info.xml")
+            translations_dir = f"translations/{lang_code}"
+            output_dir = f"output/{lang_code.upper()}"
+            special_cases_file = f"translations/{lang_code}/special_cases-{lang_code}.json"
+            
+            # Check paths
+            if not os.path.exists(input_dir):
+                print(f"Error: Input folder '{input_dir}' not found")
+                return False
+                
+            if not os.path.exists(info_xml_path):
+                print(f"Error: info.xml not found in '{input_dir}'")
+                return False
+            
+            # Parse info.xml
+            input_files = []
+            original_version = ""
+            try:
+                tree = ET.parse(info_xml_path)
+                root = tree.getroot()
+                
+                original_version = root.get('version', '')
+                print(f"Original version detected: {original_version}")
+                
+                for string_element in root.find('strings').findall('string'):
+                    relative_path = string_element.get('path')
+                    if relative_path:
+                        absolute_path = os.path.join(input_dir, relative_path)
+                        if os.path.exists(absolute_path):
+                            input_files.append(absolute_path)
+                            print(f"Found file: {relative_path}")
+                
+                print(f"Extracted {len(input_files)} files from info.xml")
+                
+            except Exception as e:
+                print(f"Error parsing info.xml: {e}")
+                return False
+            
+            if not input_files:
+                print("No valid files found in info.xml")
+                return False
+            
+            # Clean up old output directory
+            if os.path.exists(output_dir):
+                shutil.rmtree(output_dir)
+                print(f"Removed old output directory: {output_dir}")
+            
+            Path(output_dir).mkdir(parents=True, exist_ok=True)
+            
+            # Copy and update info.xml
+            output_info_path = os.path.join(output_dir, "info.xml")
+            try:
+                with open(info_xml_path, 'r', encoding='utf-8') as f:
+                    info_content = f.read()
+                
+                # Update XML attributes
+                updated_content = info_content
+                
+                # Update name, version, author, description
+                updated_content = re.sub(
+                    r'(<resource\s+name="[^"]*)"',
+                    r'\1 ITA(ClientENG)"',
+                    updated_content
+                )
+                
+                updated_content = re.sub(
+                    r'(<resource\s+[^>]*version=")([^"]*)"',
+                    rf'\1\2-mod_{mod_version}"',
+                    updated_content
+                )
+                
+                updated_content = re.sub(
+                    r'(<resource\s+[^>]*author=")([^"]*)"',
+                    r'\1\2 (edited by FlaProGmr)"',
+                    updated_content
+                )
+                
+                updated_content = re.sub(
+                    r'(<resource\s+[^>]*description=")([^"]*)"',
+                    r'\1\2 (edited version from: https://github.com/F-l-a/SupersStrings-MultiLanguage)"',
+                    updated_content
+                )
+                
+                with open(output_info_path, 'w', encoding='utf-8') as f:
+                    f.write(updated_content)
+                
+                print(f"Updated info.xml saved to: {output_info_path}")
+                
+            except Exception as e:
+                print(f"Error updating info.xml: {e}")
+                return False
+            
+            # Copy icon.png
+            icon_input_path = os.path.join(input_dir, "icon.png")
+            if os.path.exists(icon_input_path):
+                icon_output_path = os.path.join(output_dir, "icon.png")
+                shutil.copy2(icon_input_path, icon_output_path)
+                print(f"Copied icon.png to: {icon_output_path}")
+            
+            # Process files with automated choices
+            processed_files = []
+            
+            for input_file in input_files:
+                relative_path = os.path.relpath(input_file, input_dir)
+                filename = os.path.basename(relative_path)
+                
+                # Automated choice logic
+                if filename == "sws_strings_en.xml":
+                    choice = "Y"  # Translate sws_strings_en.xml
+                    print(f"File: {relative_path} - AUTO CHOICE: TRANSLATE")
+                else:
+                    choice = "N"  # Copy without translation for all others
+                    print(f"File: {relative_path} - AUTO CHOICE: COPY ONLY")
+                
+                # Create output path
+                output_file_path = os.path.join(output_dir, relative_path)
+                output_file_dir = os.path.dirname(output_file_path)
+                
+                if output_file_dir:
+                    Path(output_file_dir).mkdir(parents=True, exist_ok=True)
+                
+                if choice == "N":
+                    # Copy file without translation
+                    shutil.copy2(input_file, output_file_path)
+                    print(f"Copied without translation: {input_file} -> {output_file_path}")
+                    processed_files.append(relative_path)
+                else:
+                    # Translate the file
+                    process_single_file(input_file, lang_code, translations_dir, output_file_path, special_cases_file, len(processed_files) + 1, len(input_files))
+                    processed_files.append(relative_path)
+            
+            # Create zip_name.txt
+            try:
+                zip_name_content = f"SupersStoryStrings_{lang_code.upper()}-EN_@ClientEN@-@{original_version}-mod_{mod_version}@"
+                zip_name_path = os.path.join(output_dir, "zip_name.txt")
+                
+                with open(zip_name_path, 'w', encoding='utf-8') as f:
+                    f.write(zip_name_content)
+                
+                print(f"Created zip name file: {zip_name_path}")
+                print(f"Zip name: {zip_name_content}")
+                
+            except Exception as e:
+                print(f"Error creating zip_name.txt: {e}")
+                return False
+            
+            print(f"Automated translation completed successfully!")
+            print(f"Files processed: {len(processed_files)}")
+            return True
+        
+        # Run the automated translation
+        if apply_translations_automated("it", "${{ steps.calc_version.outputs.mod_version_number }}"):
+            print("SUCCESS: Translation completed")
+        else:
+            print("ERROR: Translation failed")
+            sys.exit(1)
+        EOF
+    
+    - name: Read zip name and create release package
+      if: steps.check_update.outputs.updated == 'true'
+      id: create_package
+      run: |
+        # Read zip name from generated file
+        ZIP_NAME=$(cat output/IT/zip_name.txt)
+        echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
+        
+        # Create the mod zip file
+        cd output/IT
+        zip -r "../../${ZIP_NAME}.mod" icon.png info.xml Strings/
+        cd ../..
+        
+        echo "Created mod file: ${ZIP_NAME}.mod"
+        ls -la "${ZIP_NAME}.mod"
+    
+    - name: Get previous release description
+      if: steps.check_update.outputs.updated == 'true'
+      id: prev_release
+      run: |
+        # Get the latest release
+        LATEST_RELEASE=$(gh release list --limit 1 --json tagName,body --jq '.[0]')
+        
+        if [ "$LATEST_RELEASE" != "null" ]; then
+          PREV_BODY=$(echo "$LATEST_RELEASE" | jq -r '.body')
+          echo "Previous release body found"
+        else
+          PREV_BODY="## Features
+        - Italian translation of SupersStoryStrings
+        - Automated translation using PokeAPI data
+        - Special cases handling for context-specific translations
+        
+        ## Installation
+        Download the .mod file and place it in your PokeMMO mods folder.
+        
+        ## Changelog"
+          echo "No previous release found, using default body"
+        fi
+        
+        # Save to file for later use
+        echo "$PREV_BODY" > prev_release_body.txt
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create GitHub Release
+      if: steps.check_update.outputs.updated == 'true'
+      id: create_release
+      run: |
+        NEW_TAG="${{ steps.calc_version.outputs.new_mod_version }}"
+        MOD_VERSION="${{ steps.calc_version.outputs.mod_version_number }}"
+        SUBMODULE_TAG="${{ steps.check_update.outputs.submodule_tag }}"
+        ZIP_NAME="${{ steps.create_package.outputs.zip_name }}"
+        
+        # Read previous release body
+        PREV_BODY=$(cat prev_release_body.txt)
+        
+        # Create new release body with updated changelog
+        NEW_CHANGELOG_ENTRY="
+        **Version mod_${MOD_VERSION} - AUTOMATIC UPDATE:**
+        - Updated SupersStoryStrings to [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
+        
+        # Insert new changelog entry after "## Changelog"
+        if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
+          # Split the body at "## Changelog" and insert our entry
+          BEFORE_CHANGELOG=$(echo "$PREV_BODY" | sed '/## Changelog/q')
+          AFTER_CHANGELOG=$(echo "$PREV_BODY" | sed '1,/## Changelog/d')
+          
+          NEW_BODY="${BEFORE_CHANGELOG}${NEW_CHANGELOG_ENTRY}
+        ${AFTER_CHANGELOG}"
+        else
+          # If no changelog section exists, add it
+          NEW_BODY="${PREV_BODY}
+        
+        ## Changelog${NEW_CHANGELOG_ENTRY}"
+        fi
+        
+        # Create the release
+        gh release create "$NEW_TAG" \
+          --title "$NEW_TAG" \
+          --notes "$NEW_BODY" \
+          "${ZIP_NAME}.mod"
+        
+        echo "Created release: $NEW_TAG"
+        echo "Uploaded file: ${ZIP_NAME}.mod"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Summary
+      if: steps.check_update.outputs.updated == 'true'
+      run: |
+        echo "## 🚀 Auto-Release Completed!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**New Release**: \`${{ steps.calc_version.outputs.new_mod_version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**SupersStrings Version**: \`${{ steps.check_update.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.mod\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔄 Process:" >> $GITHUB_STEP_SUMMARY
+        echo "1. ✅ Detected SupersStrings update" >> $GITHUB_STEP_SUMMARY
+        echo "2. ✅ Calculated new mod version" >> $GITHUB_STEP_SUMMARY
+        echo "3. ✅ Applied automated translations (IT)" >> $GITHUB_STEP_SUMMARY
+        echo "4. ✅ Created mod package" >> $GITHUB_STEP_SUMMARY
+        echo "5. ✅ Published GitHub release" >> $GITHUB_STEP_SUMMARY
+    
+    - name: No updates summary
+      if: steps.check_update.outputs.updated == 'false'
+      run: |
+        echo "## ℹ️ No Auto-Release Needed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The workflow completed but no submodule update was detected." >> $GITHUB_STEP_SUMMARY

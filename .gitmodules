@@ -1,0 +1,3 @@
+[submodule "input/SupersStrings"]
+	path = input/SupersStrings
+	url = https://github.com/superworldsun/SupersStrings

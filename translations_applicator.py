@@ -79,8 +79,8 @@ def apply_translations(lang_code):
   
   print(f"Using mod version: {mod_version}")
   
-  # Paths
-  input_dir = "input"
+  # Paths - use SupersStrings submodule
+  input_dir = os.path.join("input", "SupersStrings", "SupersStoryStrings")
   info_xml_path = os.path.join(input_dir, "info.xml")
   translations_dir = f"translations/{lang_code}"
   output_dir = f"output/{lang_code.upper()}"

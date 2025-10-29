@@ -1,0 +1,145 @@
+name: Update Submodules
+
+on:
+  # Permetti esecuzione manuale
+  workflow_dispatch:
+  
+  # Controllo settimanale come fallback
+  schedule:
+    - cron: '0 6 * * 1'  # Ogni lunedì alle 06:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
+    
+    - name: Check for new releases and update submodules
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        cd input/SupersStrings
+        
+        # Ottieni il tag attuale del submodule
+        CURRENT_TAG=$(git describe --tags --exact-match 2>/dev/null || git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
+        echo "Current submodule tag: $CURRENT_TAG"
+        
+        # Fetch per ottenere le ultime tag
+        git fetch --tags origin
+        
+        # Ottieni l'ultima tag disponibile dal repository remoto
+        LATEST_TAG=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1)
+        
+        if [ -z "$LATEST_TAG" ]; then
+          echo "No version tags found in SupersStrings repository"
+          echo "has_updates=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "Latest available tag: $LATEST_TAG"
+        
+        # Confronta le versioni
+        if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
+          echo "New release found: $CURRENT_TAG → $LATEST_TAG"
+          
+          # Aggiorna il submodule alla nuova tag
+          git checkout "$LATEST_TAG"
+          cd ../..
+          
+          # Controlla se ci sono effettivi cambiamenti nel repository principale
+          if git diff --quiet; then
+            echo "No changes detected after checkout"
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          else
+            echo "Submodule updated to new release"
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "new_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "previous_tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "Already up to date with latest release: $CURRENT_TAG"
+          echo "has_updates=false" >> $GITHUB_OUTPUT
+        fi
+      id: update
+    
+    - name: Get SupersStrings version info
+      if: steps.update.outputs.has_updates == 'true'
+      run: |
+        cd input/SupersStrings
+        
+        NEW_TAG="${{ steps.update.outputs.new_tag }}"
+        PREVIOUS_TAG="${{ steps.update.outputs.previous_tag }}"
+        COMMIT_DATE=$(git log -1 --format=%cd --date=short)
+        
+        echo "latest_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+        echo "commit_date=$COMMIT_DATE" >> $GITHUB_OUTPUT
+        
+        # Ottieni i cambiamenti tra le due release
+        if [ "$PREVIOUS_TAG" != "no-tag" ]; then
+          CHANGELOG=$(git log --oneline --pretty=format:"- %s" $PREVIOUS_TAG..$NEW_TAG)
+        else
+          CHANGELOG=$(git log --oneline -5 --pretty=format:"- %s")
+        fi
+        
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+      id: version_info
+    
+    - name: Commit and push changes
+      if: steps.update.outputs.has_updates == 'true'
+      env:
+        REPO_TOKEN: ${{ secrets.PAT_PUSH || secrets.GITHUB_TOKEN }}
+      run: |
+        git add input/SupersStrings
+        
+        # Crea un messaggio di commit dettagliato per release
+        NEW_TAG="${{ steps.version_info.outputs.latest_tag }}"
+        PREVIOUS_TAG="${{ steps.version_info.outputs.previous_tag }}"
+        
+        git commit -m "Auto-update SupersStrings submodule to $NEW_TAG
+
+        Release Date: ${{ steps.version_info.outputs.commit_date }}
+        Previous: $PREVIOUS_TAG → New: $NEW_TAG
+        Release: https://github.com/superworldsun/SupersStrings/releases/tag/$NEW_TAG
+        
+        Changes in this release:
+        ${{ steps.version_info.outputs.changelog }}"
+        
+        # Push usando il token per evitare problemi di permessi
+        BRANCH="${GITHUB_REF##*/}"
+        git push "https://x-access-token:${REPO_TOKEN}@github.com/${{ github.repository }}.git" HEAD:"$BRANCH"
+    
+    - name: Create summary
+      if: steps.update.outputs.has_updates == 'true'
+      run: |
+        NEW_TAG="${{ steps.version_info.outputs.latest_tag }}"
+        PREVIOUS_TAG="${{ steps.version_info.outputs.previous_tag }}"
+        
+        echo "## SupersStrings Release Update!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**SupersStrings** has been updated from **$PREVIOUS_TAG** to **$NEW_TAG**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Release Link**: https://github.com/superworldsun/SupersStrings/releases/tag/$NEW_TAG" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Changes in This Release:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "${{ steps.version_info.outputs.changelog }}" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+    
+    - name: No updates summary
+      if: steps.update.outputs.has_updates == 'false'
+      run: |
+        echo "## No Updates Available" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "SupersStrings submodule is already up to date!" >> $GITHUB_STEP_SUMMARY
