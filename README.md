@@ -3,15 +3,6 @@
 A CLI tool in Python that generates multilingual JSON dictionaries using [PokeAPI](https://pokeapi.co) and applies translations to [SupersStrings](https://github.com/superworldsun/SupersStrings) files via key-value matching.
 Italian translations are already present in this repository, but other languages are supported via PokeAPI.
 
-### Notes
-- sws_strings_en.xml: Misc + Buttons + NPCs + Items + Natures -> Translate all
-- sws_en_Unova_0.xml: Gyms/E4 (End Battle) (Unova) + Pokedex -> Translate Pokedex
-- sws_en_Unova_1.xml: HMs (Unova) + NPCs + Gyms/E4 (Unova)
-- sws_en_Sinnoh.xml: HMs (Sinnoh) + NPCs + Gyms/E4 (Sinnoh)
-- sws_en_Kanto.xml: HMs (Kanto) + NPCs + Gyms/E4 (Kanto)
-- sws_en_Johto.xml: HMs (Johto) + NPCs + Gyms/E4 (Johto)
-- sws_en_Hoenn.xml: HMs (Hoenn) + NPCs + Gyms/E4 (Hoenn)
-
 ## Usage Guide
 
 1. **Clone the repository with submodules:**
@@ -43,11 +34,23 @@ Italian translations are already present in this repository, but other languages
    python main.py
    ```
 
-5. **Output:**
-   - Translated files can be found in the `./output/{LANGUAGE}/` folder
-   - You may want to change the `lang` and `lang_full` parameters in each file to match your PokeMMO client language
+   https://github.com/user-attachments/assets/5f3ede9a-5db9-454f-a476-014e22669bcb
+   #### ProTip
+   - You can delete the PokeAPI local cache after the generation of JSON files. This speeds up the generation of the next file because the database gets slow easily when generating many entries. You can find the path to the cache by selecting option `3` from the main menu.
+   #### Notes
+   - `sws_strings_en.xml`: Misc + Buttons + NPCs + Items + Natures -> Translate all
+   - `sws_en_Unova_0.xml`: Gyms/E4 (End Battle) (Unova) + Pokedex -> Translate Pokedex
+   - `sws_en_Unova_1.xml`: HMs (Unova) + NPCs + Gyms/E4 (Unova)
+   - `sws_en_Sinnoh.xml`: HMs (Sinnoh) + NPCs + Gyms/E4 (Sinnoh)
+   - `sws_en_Kanto.xml`: HMs (Kanto) + NPCs + Gyms/E4 (Kanto)
+   - `sws_en_Johto.xml`: HMs (Johto) + NPCs + Gyms/E4 (Johto)
+   - `sws_en_Hoenn.xml`: HMs (Hoenn) + NPCs + Gyms/E4 (Hoenn)
 
-6. **If you want to use the tool another time:**
+6. **Output:**
+   - Translated files can be found in the `./output/{LANGUAGE}/` folder
+   - You may want to change the `lang` and `lang_full` parameters in each `.xml` file to match your PokeMMO client language. The default is English
+
+7. **If you want to use the tool another time:**
    ```bash
    .venv\Scripts\activate  # <- On Windows | On Linux/Mac -> .venv/bin/activate
    python main.py
@@ -65,7 +68,7 @@ Italian translations are already present in this repository, but other languages
 - [x] language:"https://pokeapi.co/api/v2/language/"
 
 
-## CLI Debug - [Pokeapi.co](https://pokeapi.co) is simpler
+## CLI Debug - [Pokeapi.co](https://pokeapi.co) is simpler, use the web interface
 
 ### Try API endpoints from CLI
 ```python
