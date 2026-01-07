@@ -182,7 +182,7 @@ def apply_translations(lang_code):
     # Update description attribute: add edited version info
     updated_content = re.sub(
       r'(<resource\s+[^>]*description=")([^"]*)"',
-      r'\1\2 (edited version from: https://github.com/F-l-a/SupersStrings-MultiLanguage)"',
+      r'\1\2 (edited version from: https://github.com/F-l-a/Poke-translator/releases)"',
       updated_content
     )
     

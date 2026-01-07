@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ds_strings_archive archive_type="0" lang="en" region_id="3">
+    <!--=Credits to SuperWorldSun for all strings-->
+    <!--=SupersStoryStrings Version-->
+
+    <!--HMs in Sinnoh-->
+    <string block_id="0" entry_id="12" table_id="381">{09}</string> <!--Use Surf?-->
+    <string block_id="0" entry_id="13" table_id="381">{09}</string> <!--Surf Used!-->
+    <string block_id="0" entry_id="0" table_id="381">{09}</string> <!--Use Cut?-->
+    <string block_id="0" entry_id="1" table_id="381">{09}</string> <!--Cut Used!-->
+    <string block_id="0" entry_id="2" table_id="381">Need HM-Cut!</string>
+    <string block_id="0" entry_id="3" table_id="381">{09}</string> <!--Use Rock Smash?-->
+    <string block_id="0" entry_id="5" table_id="381">{09}</string> <!--Rock Smash Used!-->
+    <string block_id="0" entry_id="4" table_id="381">Need HM-Rock Smash!</string>
+    <string block_id="0" entry_id="6" table_id="381">{09}</string> <!--Use Strength?-->
+    <string block_id="0" entry_id="10" table_id="381">{09}</string> <!--Strength Used!-->
+    <string block_id="0" entry_id="11" table_id="381">{09}</string> <!--Strength Used!-->
+    <string block_id="0" entry_id="9" table_id="381">{09}</string> <!--You can push boulders around-->
+    <string block_id="0" entry_id="22" table_id="381">{09}</string> <!--Use Waterfall?-->
+    <string block_id="0" entry_id="23" table_id="381">{09}</string> <!--Waterfall Used!-->
+    <string block_id="0" entry_id="24" table_id="381">Need HM-Waterfall!</string>
+    <string block_id="0" entry_id="18" table_id="381">{09}</string> <!--Use Rock Climb?-->
+    <string block_id="0" entry_id="19" table_id="381">{09}</string> <!--Rock Climb Used!-->
+    <string block_id="0" entry_id="20" table_id="381">Need HM-Rock Climb!</string>
+
+<!--Npcs-->
+    <!--Gym-->
+        <!--Roark-->
+            <string block_id="0" entry_id="0" table_id="67">[$8632]  /  +50%[$12948]  /  +75%[$15106]  /  +100%[$17264]\n \nWelcome! This is the Oreburgh Pokémon Gym! I'm Roark,\nthe Gym Leader! I'm but one Trainer who decided to walk\nproudly with Rock-type Pokémon! As the Gym Leader, I\nneed to see your potential as a Trainer. And, I'll need to\nsee the toughness of the Pokémon that battle with you!\n\n</string>
+        <!--Roark End Battle-->
+            <string block_id="0" entry_id="5" table_id="617">\n\n</string>
+        <!--Roark on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="67">[ON COOLDOWN / 18 Hours]\n[$8632]  /  +50%[$12948]  /  +75%[$15106]  /  +100%[$17264]\n \nIn this region of Sinnoh, there are seven other Gym Leaders.\nI should warn you--they're a lot tougher than I am!</string>
+
+        <!--Gardenia-->
+            <string block_id="0" entry_id="0" table_id="87">[$8736]  /  +50%[$13104]  /  +75%[$15288]  /  +100%[$17472]\n \nYou kept me waiting! I'm Eterna's Gym Leader, Gardenia,\nthe Grass-type master! When I first saw you, I was convinced\nyou'd find your way to me. My hunch was right on the money.\nYou have a winning aura about you. So, anyway, this will be fun.\nLet's have our battle!\n\n</string>
+        <!--Gardenia End Battle-->
+            <string block_id="0" entry_id="1227" table_id="617">\n\n</string>
+        <!--Gardenia on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="87">[ON COOLDOWN / 18 Hours]\n[$8736]  /  +50%[$13104]  /  +75%[$15288]  /  +100%[$17472]\n \nYup! If there's one thing I can tell about you, it's this! You and\nyour Pokémon are gonna get even tougher, and I mean seriously!</string>
+
+        <!--Fantina-->
+            <string block_id="0" entry_id="0" table_id="109">[$8840]  /  +50%[$13260]  /  +75%[$15470]  /  +100%[$17680]\n \nOhohoho!! Finally, you have arrived!\nSince I came to this country, always I try to learn new things.\nThey hold Contests in this city? I say to myself, enfin, I will excel.\nThat is why I dress this way. C'est une performance!\nAlso, I study Pokémon very much. I have come to be Gym Leader.\nAnd, uh, so it shall be that you challenge me.\nBut I shall win. That is what a Gym Leader does, non?\n\n</string>
+        <!--Fantina End Battle-->
+            <string block_id="0" entry_id="1290" table_id="617">\n\n</string>
+        <!--Fantina on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="109">[ON COOLDOWN / 18 Hours]\n[$8840]  /  +50%[$13260]  /  +75%[$15470]  /  +100%[$17680]\n \nThree Gym Badges... But you must not forget this.\nThere are many other Trainers. Strong Trainers, too.\nThere are many more in Sinnoh. Have patience!\nYou must become stronger, one at a time.</string>
+
+        <!--Maylene-->
+            <string block_id="0" entry_id="0" table_id="144">[$8944]  /  +50%[$13416]  /  +75%[$15652]  /  +100%[$17888]\n \nHello. I'm pleased to meet you. I'm Maylene, and I'm\nthe Gym Leader. I don't really know what it means to be\nstrong, or how I got to be the Gym Leader. But I will do the\nbest I can as the Gym Leader. I take battling very seriously.\nWhenever you're ready!\n\n</string>
+        <!--Maylene End Battle-->
+            <string block_id="0" entry_id="1275" table_id="617">\n\n</string>
+        <!--Maylene on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="144">[ON COOLDOWN / 18 Hours]\n[$8944]  /  +50%[$13416]  /  +75%[$15652]  /  +100%[$17888]\n \nGee, I'm hungry... Oh, sorry, it's nothing. I didn't say anything.\n{00}, I can't explain what it means to be strong.\nI don't know how much effort goes into being strong... But\nbeing with Pokémon lets us keep making the effort, doesn't it?</string>
+
+        <!--Crasher Wake-->
+            <string block_id="0" entry_id="0" table_id="133">[$9048]  /  +50%[$13572]  /  +75%[$15834]  /  +100%[$18096]\n \nWelcome! I don't get challenged very often!\nThe glory you are now beholding is the Pastoria Gym Leader!\nThat's right, I'm Crasher Wake! My Pokémon were toughened\nup by stormy white waters! They'll take everything you can\nthrow at them and then pull you under! Victory will be ours!\nCome on, let's get it done!\n\n</string>
+        <!--Crasher Wake End Battle-->
+            <string block_id="0" entry_id="1242" table_id="617">\n\n</string>
+        <!--Crasher Wake on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="133">[ON COOLDOWN / 18 Hours]\n[$9048]  /  +50%[$13572]  /  +75%[$15834]  /  +100%[$18096]\n \nThe styles of battling and winning are as widely varied as\nTrainers are. Do you want to know how I battle? I battle so\nI can say I had fun at the end, whether I win or lose!</string>
+
+        <!--Byron-->
+            <string block_id="0" entry_id="0" table_id="56">[$9152]  /  +50%[$13728]  /  +75%[$16016]  /  +100%[$18304]\n \nAh! That's Oreburgh's Gym Badge! I see, I see! You've defeated\nmy son. But that's no surprise. He still has much to learn.\nIn place of my son Roark, I, Byron, will take your challenge!\n\n</string>
+        <!--Byron End Battle-->
+            <string block_id="0" entry_id="1163" table_id="617">\n\n</string>
+        <!--Byron on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="56">[ON COOLDOWN / 18 Hours]\n[$9152]  /  +50%[$13728]  /  +75%[$16016]  /  +100%[$18304]\n \nGwahahahaha! The Sinnoh region is vast! Tough Trainers like you\nand {01} crop up constantly to challenge the old guard! With\nmore young Trainers like my son and you two taking charge, the\nfuture of Pokémon is bright! But I'm not stepping aside just yet!\nI merely need to rededicate myself to training on Iron Island.</string>
+
+        <!--Candice Battle-->
+            <string block_id="0" entry_id="0" table_id="178">[$9256]  /  +50%[$13884]  /  +75%[$16198]  /  +100%[$18512]\n \nYou want to challenge Candice? Sure thing! I was waiting for\nsomeone tough! But I should tell you, I'm tough because I know\nhow to focus. Pokémon, fashion, romance... It's all about focus!\nI'll show you just what I mean. Get ready to lose!\n\n</string>
+        <!--Candice End Battle-->
+            <string block_id="0" entry_id="1317" table_id="617">\n\n</string>
+        <!--Candice on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="178">[ON COOLDOWN / 18 Hours]\n[$9256]  /  +50%[$13884]  /  +75%[$16198]  /  +100%[$18512]\n \nDo you think I should try to act more like an Ice-type Gym Leader?\nLike, do you think I should be more cool and distant?\nThat sort of thing I have trouble with.</string>
+
+        <!--Volkner Battle-->
+            <string block_id="0" entry_id="0" table_id="165">[$9360]  /  +50%[$14040]  /  +75%[$16380]  /  +100%[$18720]\n \n...All right, challenger. It's not often, but some Trainers\nmanage to come and challenge me. But they've all been boring\nbattles. I didn't break a sweat beating them....Sigh... I'm Volkner,\nthe Gym Leader. They say I'm the top Gym Leader in Sinnoh, but...\nAnyway, I guess we'd better get this done. I hope you're the\nTrainer who'll make me remember how fun it is to battle!\n\n</string>
+        <!--Volkner End Battle-->
+            <string block_id="0" entry_id="1339" table_id="617">\n\n</string>
+        <!--Volkner on Cooldown-->
+            <string block_id="0" entry_id="5" table_id="165">[ON COOLDOWN / 18 Hours]\n[$9360]  /  +50%[$14040]  /  +75%[$16380]  /  +100%[$18720]\n \nYour next step is the Pokémon League challenge. It's time for\nyou to cross the sea and win your way through the gauntlet that\nis Victory Road. Demonstrate to the Pokémon League your\nmastery of your team. Against you, even the Elite Four will be\npushed to fend off your challenge!</string>
+
+    <!--Elite Four-->
+        <!--Door Guard-->
+            <string block_id="0" entry_id="4" table_id="184">You will be facing the Elite Four of the Pokémon League. If you\ncan't beat all four of them in a row, you have to start from the\nfirst one again.</string>
+            <string block_id="0" entry_id="3" table_id="184">Very well! Trainer, you've indeed collected all the Gym\nBadges of Sinnoh! Demonstrate the power that brought you\nhere and go for glory!</string>
+
+        <!--Aaron Battle-->
+            <string block_id="0" entry_id="0" table_id="185">Hello! Welcome to the Pokémon League! I'm Aaron of the Elite\nFour. It's good to meet you. Oh, I should explain, I'm a huge fan of\nbug Pokémon. Bug Pokémon are nasty-mean, and yet they're\nbeautiful, too... Would you like to know why I take on challengers\nhere? It's because I want to become perfect, just like my bug\nPokémon! OK! Let me take you on!\n\n</string>
+        <!--Aaron lost Battle-->
+            <string block_id="0" entry_id="1968" table_id="617">\n\n</string>
+        <!--Aaron end Battle-->
+            <string block_id="0" entry_id="1" table_id="185">I lost with the most beautiful and toughest of the bug Pokémon...\nWe lost because I wasn't good enough... That's it! Back to training\ncamp! Let's hear it for me! No... That was wrong... Anyway...\nGo on to the next room! Three Trainers are waiting for you.\nThey're all tougher than me.</string>
+        <!--Aaron Cooldown-->
+            <string block_id="0" entry_id="2" table_id="185">Go on, go to the next room. I'm going to become a top-level\nTrainer who can't be outclassed with my beautiful and tough\nbug Pokémon!</string>
+
+        <!--Bertha Battle-->
+            <string block_id="0" entry_id="0" table_id="186">Well, well. You're quite the adorable Trainer, but you've also got\na spine. Ahaha! I'm Bertha. I have a preference for Ground-type\nPokémon. Well, would you show this old lady how much\nyou've learned?\n\n</string>
+        <!--Bertha lost Battle-->
+            <string block_id="0" entry_id="1970" table_id="617">\n\n</string>
+        <!--Berthaon end Battle-->
+            <string block_id="0" entry_id="1" table_id="186">You're quite something, youngster. I like how you and your\nPokémon earned the win by working as one. That's what makes\nyou so strong. Ahahaha! I think that you can go as far as you want.</string>
+        <!--Berthaon Cooldown-->
+            <string block_id="0" entry_id="2" table_id="186">The Trainer in the next room is a much more formidable\nopponent. You really must have your wits about you.\nHowever, I think you can go as far as you desire. Ahahaha!</string>
+
+        <!--Flint Battle-->
+            <string block_id="0" entry_id="4" table_id="187">I was waiting for you, challenger!\nFlint, the master of the Fire type, is up next! Battles\nare clashes of the burning spirit of Pokémon. Battles aren't\nabout appearances or what's weak or strong. It all comes\ndown to whether the combatants can burn hot or not.\n\n</string>
+        <!--Flint lost Battle-->
+            <string block_id="0" entry_id="1973" table_id="617">\n\n</string>
+        <!--Flint end Battle-->
+            <string block_id="0" entry_id="5" table_id="187">... ...\n...Whew...\n...Burnt right down to cinders...</string>
+        <!--Flint Cooldown-->
+            <string block_id="0" entry_id="6" table_id="187">... ... ...Keep going... I know your spirit burns hot.\nYour whole team does.</string>
+
+        <!--Lucian Battle-->
+            <string block_id="0" entry_id="0" table_id="188">Ah, you timed your arrival well. I've just finished reading\na book, you see. Allow me to introduce myself. I am Lucian.\nI am a user of the Psychic type. I must say, you've already\nproven yourself to be outstanding by coming this far. They\nsay I am the toughest of the Elite Four. I'm afraid I will have\nto go all out against you to live up to that reputation.\n\n</string>
+        <!--Lucian lost Battle-->
+            <string block_id="0" entry_id="1975" table_id="617">\n\n</string>
+        <!--Lucian end Battle-->
+            <string block_id="0" entry_id="1" table_id="188">Congratulations. You've now beaten the Elite Four. However,\nthat doesn't mean you're done with the Pokémon League.\nThere remains the Champion. I should warn you--the Champion\nis far stronger than the Elite Four. Now, go on. Step through the\ndoorway to your final battle.</string>
+        <!--Lucian on Cooldown-->
+            <string block_id="0" entry_id="2" table_id="188">I'll be reading books until the next challenger arrives.\nThat will calm my nerves, so that I may deal with all situations\nwithout panicking.</string>
+
+        <!--Cynthia Battle-->
+            <string block_id="0" entry_id="3" table_id="189">Cynthia: One look at you tells me many things about you.\nTogether, you and your Pokémon overcame all the challenges you\nfaced, however difficult. It means that you've triumphed over\nany personal weaknesses, too. The power you learned... I can feel\nit from you. That's enough talking. Let's get on with why you're\nhere. I, Cynthia, accept your challenge as the Pokémon League\nChampion! There won't be any letup from me!\n\n</string>
+        <!--Cynthia lost Battle-->
+            <string block_id="0" entry_id="1978" table_id="617">\n\n</string>
+        <!--Cynthia Beat-->
+            <string block_id="0" entry_id="1" table_id="189">Cynthia: That was excellent. Truly, an outstanding battle. You\ngave the support your Pokémon needed to maximize their power.\nAnd you guided them with certainty to secure victory. You have\nboth passion and calculating coolness. Together, you and your\nPokémon can overcome any challenge that may come your way.\nThose are the impressions I got from our battle. I'm glad I got to\ntake part in the crowning of Sinnoh's new Champion!\n\n</string>
+            <string block_id="0" entry_id="2" table_id="189">Come with me. We'll take the lift.\n\n</string>
+            <string block_id="0" entry_id="0" table_id="190">Cynthia: The room ahead is the Hall of Fame...\n\n</string>
+        <!--Rowan-->
+            <string block_id="0" entry_id="1" table_id="190">Rowan: {00}! Your last battle was splendid!\n\n</string>
+        <!--Cynthia-->
+            <string block_id="0" entry_id="2" table_id="190">Cynthia: Oh, hello, Professor Rowan.\n\n</string>
+        <!--Rowan-->
+            <string block_id="0" entry_id="3" table_id="190">Rowan: Hm! A child I enlisted for my Pokédex project has come\nthis far... It's only natural that I come and witness the child's\ncrowning glory. {00}! I shouldn't call you\na child anymore. You've grown into a real Champion!\n\n</string>
+        <!--Cynthia-->
+            <string block_id="0" entry_id="4" table_id="190">Cynthia: Professor, you still enjoy the enthusiasm kids\nbring to your research, don't you?\n\n</string>
+            <string block_id="0" entry_id="5" table_id="190">{00}, step this way, please.\n\n</string>
+            <string block_id="0" entry_id="7" table_id="190">Professor Rowan, please join us.\n\n</string>
+        <!--Rowan-->
+            <string block_id="0" entry_id="0" table_id="191">Rowan: It's been a long while since I last entered this room...\n\n</string>
+        <!--Cynthia-->
+            <string block_id="0" entry_id="2" table_id="191">Cynthia: If your last time here was when I became Champion, then yes,\nthat would be quite a long time ago.\n\n</string>
+        <!--Rowan-->
+            <string block_id="0" entry_id="1" table_id="191">Rowan: No matter how many times I come here, I always\nfind myself standing up straighter than usual.\n\n</string>
+        <!--Cynthia-->
+            <string block_id="0" entry_id="3" table_id="191">Cynthia: It's a natural reaction, Professor. This room is a\nlegacy to the hopes, dreams, and struggles of Pokémon\nand their Trainers to excel.\n\n</string>
+            <string block_id="0" entry_id="4" table_id="191">Cynthia: {00}, welcome to the Hall of Fame.\n\n</string>
+            <string block_id="0" entry_id="6" table_id="191">Your names will be recorded for posterity here.\nWhat you are leaving are the memories of your adventure\nso far. It's time to record your names. You and your Pokémon.\nRemember, your Pokémon are partners that grew with you\nthrough many challenging battles. This machine will make a\npermanent record of your achievement.\n\n</string>
+
+        <!--Nurse Joy-->
+            <!--Healing from NJ-->
+                <string block_id="0" entry_id="0" table_id="213">{09}</string>
+                <string block_id="0" entry_id="120" table_id="213">{09}</string>
+                <string block_id="0" entry_id="121" table_id="213">{09}</string>
+            <!--Waiting...-->
+                <string block_id="0" entry_id="1" table_id="213">{09}</string>
+            <!--Thanks for waiting-->
+                <string block_id="0" entry_id="2" table_id="213">{09}</string>
+            <!--After Heal-->
+                <string block_id="0" entry_id="3" table_id="213">{09}</string>
+
+        <!--Shop Npcs-->
+            <string block_id="0" entry_id="37" table_id="213">{09}</string> <!--Shop Npc greeting-->
+
+    <!--Lady Blocking snowpoint temple-->
+    <!--Walk Past--><string block_id="0" entry_id="0" table_id="176">Only the chosen may enter the Snowpoint Temple.\nI'm sorry, but you will have to leave.\n \n[You must complete the Regional Seen dex for Sinnoh,\nonce you have talk to Professor Rowan and return here.]\n(No Legendary or Mythical required for completion)\n\n</string>
+    <!--Talk to them--><string block_id="0" entry_id="1" table_id="176">Only the chosen may enter the Snowpoint Temple.\nI'm sorry, but you will have to leave.\n \n[You must complete the Regional Seen dex for Sinnoh,\nonce you have talk to Professor Rowan and return here.]\n(No Legendary or Mythical required for completion)</string>
+
+    <!--Random Guy Blocking R224-->
+    <string block_id="0" entry_id="1" table_id="250">Let me size you up... You'll meet many, many Pokémon.\nThat's what you should be thinking.\nEventually, the world will appear bigger to you!\n \n[You must complete the Regional Seen dex for Sinnoh,\nonce you have talk to Professor Rowan and return here.]\n(No Legendary or Mythical required for completion)</string>
+
+    <!--DayCare Lady-->
+        <string block_id="0" entry_id="15" table_id="547">I'm the Day-Care Lady. We can raise Pokémon for you.\nWould you like us to raise your Pokémon?</string>
+        <string block_id="0" entry_id="16" table_id="547">Which Pokémon should we raise for you?\n\n</string>
+        <string block_id="0" entry_id="17" table_id="547">Fine, we'll raise your {00} for a while.\nCome back for it later.\n\n</string>
+        <string block_id="0" entry_id="18" table_id="547">We can raise two of your Pokémon.\nWould you like us to raise another?</string>
+        <string block_id="0" entry_id="20" table_id="547">Oh, fine, then. Come again.</string>
+        <string block_id="0" entry_id="22" table_id="547">Do you want to take back the other one, too?</string>
+        <string block_id="0" entry_id="24" table_id="547">Ah, it's you! Good to see you. Now, about your Pokémon...\n\n</string>
+        <string block_id="0" entry_id="25" table_id="547">By level, your {00} has\ngrown by about {01}.\n\n</string>
+        <string block_id="0" entry_id="26" table_id="547">Your Pokémon team is full.\nMake room, then come see me.</string>
+        <string block_id="0" entry_id="27" table_id="547">Which Pokémon will you take back?</string>
+        <string block_id="0" entry_id="28" table_id="547">If you want your {00} back,\nit will cost ${01}.</string>
+        <string block_id="0" entry_id="29" table_id="547">Excellent! Here's your Pokémon.\n\n</string>
+        <string block_id="0" entry_id="30" table_id="547">{01} took {00} back\nfrom the Day-Care Lady.\n\n</string>
+        <string block_id="0" entry_id="31" table_id="547">Oh? But you only have one Pokémon with you.\nYou can't go off without a Pokémon.\nCome back another time.</string>
+
+    <!--DayCare Lady-->
+        <string block_id="0" entry_id="33" table_id="547">If you leave me that Pokémon, what are you gonna battle with?\nCome back another time.</string>
+
+    <!--Both breeders-->
+        <string block_id="0" entry_id="23" table_id="547">Very good. Come again.</string>
+
+    <!--The Great Marsh (Safari)-->
+        <!--Game Clerk-->
+            <string block_id="0" entry_id="0" table_id="136">Welcome to the Great Marsh, the home of Pastoria's\nSafari Game! All you can catch for just $500!\nWould you like to play a Safari Game?</string>
+            <string block_id="0" entry_id="1" table_id="136">That will be $500, please.\n\n</string>
+            <string block_id="0" entry_id="2" table_id="136">Here are your Safari Balls.\n\n</string>
+            <string block_id="0" entry_id="3" table_id="136">{00} received 30 Safari Balls.\n\n</string>
+            <string block_id="0" entry_id="4" table_id="136">We'll let you know when your game is over.\nUntil then, enjoy yourself, please!\nOff you go on your wild excursion!\n\n</string>
+            <string block_id="0" entry_id="10" table_id="136">OK. I'll relieve you of your remaining Safari Balls.\nThank you for playing. We hope to see you again.\n\n</string>
+            <string block_id="0" entry_id="9" table_id="136">You still have time left.\nAre you sure you want to exit the Great Marsh?</string>
+
+        <!--Bug catcher at top stairs-->
+            <string block_id="0" entry_id="3" table_id="137">Each Area in the Marsh has different Pokémon depending\non the day. Here is the list of areas and there rotations!\n\nArea 1\n \n-Sunday: Skorupi\n-Monday: Croagunk\n-Tuesday: Croagunk\n-Wednesday: Carnivine\n-Thursday: Croagunk\n-Friday: Skorupi\n-Saturday: Skorupi\n\nArea 2\n \n-Sunday: Skorupi\n-Monday: Skorupi\n-Tuesday: Croagunk\n-Wednesday: Croagunk\n-Thursday: Carnivine\n-Friday: Croagunk\n-Saturday: Skorupi\n\nArea 3\n \n-Sunday: Croagunk\n-Monday: Skorupi\n-Tuesday: Skorupi\n-Wednesday: Croagunk\n-Thursday: Croagunk\n-Friday: Carnivine\n-Saturday: Croagunk\n\nArea 4\n \n-Sunday: Carnivine\n-Monday: Croagunk\n-Tuesday: Skorupi\n-Wednesday: Skorupi\n-Thursday: Croagunk\n-Friday: Croagunk\n-Saturday: Carnivine\n\nArea 5\n \n-Sunday: Croagunk\n-Monday: Carnivine\n-Tuesday: Croagunk\n-Wednesday: Skorupi\n-Thursday: Skorupi\n-Friday: Croagunk\n-Saturday: Croagunk\n\nArea 6\n \n-Sunday: Croagunk\n-Monday: Croagunk\n-Tuesday: Carnivine\n-Wednesday: Croagunk\n-Thursday: Skorupi\n-Friday: Skorupi\n-Saturday: Croagunk</string>
+        <!--Stone Signs inside marsh-->
+            <string block_id="0" entry_id="1" table_id="240">Great Marsh Area 1\n \n-Sunday: Skorupi\n-Monday: Croagunk\n-Tuesday: Croagunk\n-Wednesday: Carnivine\n-Thursday: Croagunk\n-Friday: Skorupi\n-Saturday: Skorupi</string>
+            <string block_id="0" entry_id="1" table_id="241">Great Marsh Area 2\n \n-Sunday: Skorupi\n-Monday: Skorupi\n-Tuesday: Croagunk\n-Wednesday: Croagunk\n-Thursday: Carnivine\n-Friday: Croagunk\n-Saturday: Skorupi</string>
+            <string block_id="0" entry_id="1" table_id="242">Great Marsh Area 3\n \n-Sunday: Croagunk\n-Monday: Skorupi\n-Tuesday: Skorupi\n-Wednesday: Croagunk\n-Thursday: Croagunk\n-Friday: Carnivine\n-Saturday: Croagunk</string>
+            <string block_id="0" entry_id="1" table_id="243">Great Marsh Area 4\n \n-Sunday: Carnivine\n-Monday: Croagunk\n-Tuesday: Skorupi\n-Wednesday: Skorupi\n-Thursday: Croagunk\n-Friday: Croagunk\n-Saturday: Carnivine</string>
+            <string block_id="0" entry_id="1" table_id="244">Great Marsh Area 5\n \n-Sunday: Croagunk\n-Monday: Carnivine\n-Tuesday: Croagunk\n-Wednesday: Skorupi\n-Thursday: Skorupi\n-Friday: Croagunk\n-Saturday: Croagunk</string>
+            <string block_id="0" entry_id="2" table_id="245">Great Marsh Area 6\n \n-Sunday: Croagunk\n-Monday: Croagunk\n-Tuesday: Carnivine\n-Wednesday: Croagunk\n-Thursday: Skorupi\n-Friday: Skorupi\n-Saturday: Croagunk</string>
+         <!--inside Marsh-->
+            <string block_id="0" entry_id="3" table_id="538">Where would you like to go?</string>
+            <string block_id="0" entry_id="4" table_id="538">{00} didn't board the Quick Tram.</string>
+            <string block_id="0" entry_id="0" table_id="538">Ding-dong! Time's up!\nYour Safari Game is over.</string>
+            <string block_id="0" entry_id="1" table_id="538">Ding-dong! You've run out of Safari Balls.\nYour Safari Game is over.</string>
+
+    <!--Route 225-->
+    <!--Bird keeper Audrey bottom left-->
+    <string block_id="0" entry_id="1591" table_id="617">I let my bird Pokémon carry me to wherever.\nAnd so, here I am!\n\n</string>
+    <string block_id="0" entry_id="1592" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1593" table_id="617">I was born in the Hoenn region.\nI've only just recently flown here.\n</string>
+
+    <!--PKMN Ranger Ashlee top left-->
+    <string block_id="0" entry_id="1691" table_id="617">In the embrace of Mother Nature,\npeople and Pokémon grow strong!\n\n</string>
+    <string block_id="0" entry_id="1692" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1693" table_id="617">It doesn't matter where they grow. Pokémon can be\nmade tougher anywhere if you set your mind to it.\n</string>
+
+    <!--Psychic Daisy top right-->
+    <string block_id="0" entry_id="1667" table_id="617">Right after this, you will send out your\nPokémon to do battle!\n\n</string>
+    <string block_id="0" entry_id="1668" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1669" table_id="617">What will you do after this?\nWhy don't you decide for yourself?\nIt would be much more fun that way!\n</string>
+
+    <!--PKMN Ranger Dwayne-->
+    <string block_id="0" entry_id="1687" table_id="617">We go on patrol to make sure there's nothing strange\ngoing on. And occasionally, we battle!\n\n</string>
+    <string block_id="0" entry_id="1688" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1689" table_id="617">Using the Pokémon ability Pickup for gathering dropped items\nis a good thing. I think it's ecological, even. I am cleaning up\nthe environment!\n</string>
+
+    <!--Ace Trainer Rodolfo-->
+    <string block_id="0" entry_id="1615" table_id="617">There is something missing in the way I battle...\nI've come here to find it.\n\n</string>
+    <string block_id="0" entry_id="1616" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1617" table_id="617">Battling you was an eye-opener.\nI learned something very important in that short time.\n</string>
+
+    <!--Ace Trainer Quinn-->
+    <string block_id="0" entry_id="1631" table_id="617">I've pumped up my gang till they can't get pumped no more.\nThey're going to school your Pokémon!\n\n</string>
+    <string block_id="0" entry_id="1632" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1633" table_id="617">I fed my gang Protein, Carbos...\nYou name it, I pumped 'em full of it.\n</string>
+
+    <!--Ace Trainer Deanna-->
+    <string block_id="0" entry_id="1639" table_id="617">Worthy opponents... The search for them drives me to travel far.\n\n</string>
+    <string block_id="0" entry_id="1640" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1641" table_id="617">How much you believe in your Pokémon...\nThat's a critical factor in how a battle will turn out.\n</string>
+
+
+
+    <!--Route 209-->
+    <!--Fisherman on bridge who gives the Good Rod-->
+    <string block_id="0" entry_id="10" table_id="480">Hmm!\n{00} is really good!\n\nWouldn't you agree?</string>
+    <string block_id="0" entry_id="11" table_id="480">Hmm!\nWe're of identical minds!\n\nHmm!\nTake this {00}!\n\n</string>
+    <string block_id="0" entry_id="12" table_id="480">Try fishing wherever there is a body of water.\nOh, incidentally, do you need me to explain how to use that fishing rod?</string>
+    <string block_id="0" entry_id="13" table_id="480">You don't like to fish?</string>
+    <string block_id="0" entry_id="14" table_id="480">First, you face any body of water, then you use your fishing rod.\nThen you have to get a nibble, it takes patience!</string>
+    <string block_id="0" entry_id="15" table_id="480">When you're fishing for Pokémon, the first hurdle is getting a bite.\nWhen you start to reel that Pokémon in, you've got to battle it.\nSo, fishing gives you twice the fun!</string>
+
+
+
+    <!--Fight Resort-->
+    <!--Fisherman who gives you the Super Rod Top Left-->
+    <string block_id="0" entry_id="42" table_id="192">Hmm! A Super Rod is really good!\nWouldn't you agree?</string>
+    <string block_id="0" entry_id="43" table_id="192">Hmm! We're of identical minds! Hmm!\nTake this {00}!\n\n</string>
+    <string block_id="0" entry_id="44" table_id="192">Wherever there's water, try your luck at fishing.</string>
+    <string block_id="0" entry_id="45" table_id="192">Don't you like to fish?</string><!--Dont Agree-->
+    <string block_id="0" entry_id="46" table_id="192">What's that? Any advice for fishing?\nWell, I'll tell you. It's all about the rod and technique!</string>
+
+
+    <!--Route 227-->
+
+    <!--Ace Trainer Saul-->
+    <string block_id="0" entry_id="1619" table_id="617">I've got the urge to battle with you.\nHope you're willing to oblige!\n\n</string>
+    <string block_id="0" entry_id="1620" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1621" table_id="617">So long as my partner's alongside me,\nI'm willing to take on the world!\n</string>
+
+    <!--PKMN Ranger Felicia-->
+    <string block_id="0" entry_id="1695" table_id="617">We've grown strong together in nature and in the concrete\njungle. We make everywhere we go our playground!\n\n</string>
+    <string block_id="0" entry_id="1696" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1697" table_id="617">Look around you at this wildly contorted terrain. It's no wonder\nthat Pokémon would xgrow tough in a place like this.\n</string>
+
+    <!--Convo with Wake and Barry-->
+    <string block_id="0" entry_id="5" table_id="525">Wake: Oh, if it isn't {00}!\nIt's been a while! You've grown so tough that you're training out\nhere now... Everyone keeps getting tougher and tougher... And,\nin doing that, they develop closer bonds with their Pokémon...\n\n</string>
+    <string block_id="0" entry_id="6" table_id="525">{01}: That's my master!\nThose are words of wisdom!\n\n</string>
+    <string block_id="0" entry_id="7" table_id="525">Wake: What? Are you still having trouble understanding?\nI don't for a second ever recall accepting you as an apprentice!\nI mean, if it's wrestling moves, I can show you all you like, but...\n\n</string>
+    <string block_id="0" entry_id="8" table_id="525">{01}: Awww, master, don't be that way!\nYou've got to get me into that club in the Survival Area!\n\n</string>
+    <string block_id="0" entry_id="9" table_id="525">Wake: ...How'd I get involved in this...?\nSo, anyway, {00}. You're going to Stark Mountain?\nEven the wild Pokémon there are very, very tough... If your\nPokémon aren't well trained, they'll have a miserable time...\nThen again, that kind of challenge is an exciting prospect...\nBut no matter what, you'd better be fully prepared!\nI've got to get ready for another tournament. Farewell!\n\n</string>
+    <string block_id="0" entry_id="10" table_id="525">{01}: You know, I think I got a little tougher again.\nThat's why I'm off to the Battle Frontier so I can make some challenges!\n\n</string>
+    <string block_id="0" entry_id="11" table_id="525">Master! Wait for me!\n\n</string>
+
+    <!--Old Lady in house who heals HP-->
+    <string block_id="0" entry_id="0" table_id="526">Oh, dear, are your Pokémon feeling tired?\nYou should rest up. Yes, good idea! Rest up here!</string>
+    <string block_id="0" entry_id="1" table_id="526">Yes, yes, that's right. Get some well-earned rest.\n\n</string>
+    <string block_id="0" entry_id="3" table_id="526">Is that right? You're sure now? I'm only concerned for your sake.\nNo need to worry about putting me out!</string>
+    <string block_id="0" entry_id="2" table_id="526">Oh, you're still looking tired. You're still needing rest, are you?\nYou should rest up again. Yes, good idea! Rest up here!</string>
+
+
+    <!--Buck stops you-->
+    <string block_id="0" entry_id="0" table_id="525">Buck: Yo, if it isn't {00}!\nOut training right away, are you?\nSo, uh, since you're training anyway, can you do me a favor?\nI'd like you to patrol Stark Mountain for me.</string>
+    <string block_id="0" entry_id="3" table_id="525">I'll keep asking the same thing over and\nover until you say “Yes!”\n\n</string>
+    <string block_id="0" entry_id="1" table_id="525">Buck: Up past here, there's this volcano. It's Stark Mountain.\nDeep inside it is this special rock called the Magma Stone.\nI can't explain it well, but it's really important.\nIt keeps a Pokémon asleep. But lately, I've been hearing rumors\nabout vandals in Stark Mountain. They say goons in space suits\nare causing trouble there.\n\n</string>
+    <string block_id="0" entry_id="2" table_id="525">Huh? What, me? I was on my way to the Pokémon Center\nbecause my Pokémon's low on HP. So, if you could get up to\nStark Mountain now, that'd be great. Thanks!\n\n</string>
+    <string block_id="0" entry_id="4" table_id="525">Buck: OK! You're in charge! Patrol Stark Mountain for me!\nDon't worry about me. Not even a little bit, OK?</string>
+
+    <!--Ace Trainer Mikayla-->
+    <string block_id="0" entry_id="1651" table_id="617">The world is huge, and there are so many different Pokémon!\nWhat kinds of Pokémon are with you?\nPlease, I want to have a look!\n\n</string>
+    <string block_id="0" entry_id="1652" table_id="617">Wow, there are Pokémon that\nwonderful!\n</string>
+    <string block_id="0" entry_id="1653" table_id="617">There is always something to like about any Pokémon.\nIt's so hard to decide which ones I should raise.\n</string>
+
+
+
+    <!--Black Belt Griffin-->
+    <string block_id="0" entry_id="1675" table_id="617">I have meditated under a waterfall to temper my spirit.\nAllow me to demonstrate its strength!\n\n</string>
+    <string block_id="0" entry_id="1676" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1677" table_id="617">All that time under the waterfall...\nSeems I've caught a cold.\n</string>
+
+    <!--Dragon Tamer Darien-->
+    <string block_id="0" entry_id="1603" table_id="617">My Pokémon and I seek only victory!\n\n</string>
+    <string block_id="0" entry_id="1604" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1605" table_id="617">I failed my Pokémon! I wasn't prepared enough to lead it!\nI don't ever want my precious Pokémon to be humiliated again!\n</string>
+
+
+    <!--Eavesdropping Grunts-->
+    <string block_id="0" entry_id="0" table_id="261">Grunt 1: This is it! Stark Mountain!\nNow we need to get deep inside. Let's do this!\n\n</string>
+    <string block_id="0" entry_id="1" table_id="261">Grunt 2: Yeah, but... Can that old guy really take over?\nCan he replace Master Cyrus?\n\n</string>
+    <string block_id="0" entry_id="2" table_id="261">Grunt 1: Yeah, I hear you... That elder Charon is a Commander,\nbut he can't replace Master Cyrus. ...Maybe this is a good time\nfor me to be done with this Team Galactic thing...\n\n</string>
+
+    <!--Stark Mountain-->
+    <!--Stark Mountain Entrance Sign--><string block_id="0" entry_id="9" table_id="261">Stark Mountain Eruption Zone!</string>
+
+    <!--First Entering, Getting stopped by Planets-->
+    <string block_id="0" entry_id="0" table_id="262">Mars: Hey! You! Tell us where Master Cyrus went.\nWhere were you after you disappeared at the Spear Pillar?\nHuh? The Distortion World?! Where GIRATINA was?\nYou're not making any sense! Don't play that card with me!\nFine! You don't want to talk? I'll bash you and make you talk!\n\n</string>
+    <string block_id="0" entry_id="2465" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1" table_id="262">Mars: My Pokémon let me down again! How am I supposed to\nget information about our missing Master Cyrus?\n\n</string>
+    <string block_id="0" entry_id="2" table_id="262">Jupiter: ...Mars. You really are weak. Pitifully so.\nYou make me embarrassed to be a Commander like you. Fine.\nI'll go up next. I want to know what became of Master Cyrus, too.\n\n</string>
+    <string block_id="0" entry_id="2466" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="3" table_id="262">Jupiter: ...How dare you!\n\n</string>
+    <string block_id="0" entry_id="4" table_id="262">Mars: OK! That's it for me! I'm going to look for Master Cyrus.\nThe Distortion World, was it called? I should go there, right?\nI'm quits with Team Galactic. Jupiter, you can deal with it!\n\n</string>
+    <string block_id="0" entry_id="5" table_id="262">Jupiter: Following Mars's lead at anything irks me, but...\nI'm quitting to do my own thing, too. Team Galactic's just no\nfun without Master Cyrus around. So, old-timer, go ahead.\nDo what you want with Team Galactic.\n\n</string>
+    <string block_id="0" entry_id="6" table_id="262">Mars: There you have it. We're going back to being ordinary girls.\nYou can mop up whichever way you want.\n\n</string>
+    <string block_id="0" entry_id="7" table_id="262">Jupiter: ...Says you. An “ordinary girl” you're not.\nWhat should I do now? Is leaving on a journey the right idea?\n\n</string>
+    <string block_id="0" entry_id="8" table_id="262">Charon: Sigh... So impressionable and impetuous. What do they\nsee in Cyrus? Immature, overthinking buffoon. He goes through\nthe trouble of assembling Team Galactic for what?\nUltimately, he destroys his own creation for his ludicrous vision.\nIt's no thanks to him that I have to struggle with the pieces.\n\n</string>
+    <string block_id="0" entry_id="9" table_id="262">...But that's fine. The young can live with their dreams. I prefer\nto remain firmly in reality. And for that, money is paramount.\nYou there, child. I'm not dealing with you. After all, the other\nGalactic members who did all suffered consequences.\nWe'll be off to collect the Magma Stone. It's all for the money!\n\n</string>
+
+    <!--Buck Stopping you when entering next room-->
+    <string block_id="0" entry_id="0" table_id="263">Buck: Hey, {00}, wait up!\nSo, what's going on? ...What?! Team Galactic's here?\nGotcha! Let's team up and go together.\n\n</string>
+    <string block_id="0" entry_id="1" table_id="263">{00} decided to go with Buck!</string>
+    <!--Random Buck interactions-->
+    <string block_id="0" entry_id="2" table_id="263">Buck: You won't regret teaming up!\nI'll keep your Pokémon healthy!</string>
+    <string block_id="0" entry_id="42" table_id="429">Buck: This is where I raised my Pokémon.\nI can't stand the thought of anyone making a mess of this place.\nEspecially not those weird Team Galactic goons!</string>
+    <string block_id="0" entry_id="43" table_id="429">Buck: There's no law that says I have to be tough or anything,\nbut losing isn't fair to my Pokémon. After all, they try so hard\nfor me. I think it's my responsibility as a Trainer to recognize their hard work.</string>
+    <string block_id="0" entry_id="44" table_id="429">Buck: My big brother's one of the Elite Four. So, of course\nit's only normal that I'd be better than ordinary folks.\nBut that's not what I want. I want to be tough on my own terms.\nIt wouldn't be fair to the Pokémon that chose to be with me.</string>
+    <string block_id="0" entry_id="45" table_id="429">Buck: It might be cool being a Gym Leader or one of the Elite\nFour... But, then again, it sounds like it'd be a lot of hard work!</string>
+    <string block_id="0" entry_id="3" table_id="263">Buck: Team Galactic's here, right? Let's go together!\n\n</string>
+    <string block_id="0" entry_id="4" table_id="263">Buck: Whoa! Hold up! If you go back, you'll leave me all by my\nlonesome here! Well, if you gotta go, you gotta go.\nI'll stick around here for you.\n\n</string>
+    <!--Reach the top before the room-->
+    <string block_id="0" entry_id="5" table_id="263">Buck: Here we are! Team Galactic's inside, right?\nThis is it. No fooling around!\n\n</string>
+
+
+    <!--Black Belt Ray-->
+    <string block_id="0" entry_id="1777" table_id="617">My Pokémon can destroy anything.\nAnd you think you can win?!\n\n</string>
+    <string block_id="0" entry_id="1778" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1779" table_id="617">Even though my team could break bricks and shatter boulders,\nthey failed to dent your spirits!\n</string>
+
+    <!--Bird Keeper Krystal-->
+    <string block_id="0" entry_id="1738" table_id="617">With one mighty flap, my birds blow\naway the embers of aggression!\n\n</string>
+    <string block_id="0" entry_id="1739" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1740" table_id="617">The HM Fly isn't useful inside caves. It's such a shame.\n</string>
+
+    <!--Dragon Tamer Drake-->
+    <string block_id="0" entry_id="1741" table_id="617">Dragons and a fiery mountain... It's a totally classic setup!\n\n</string>
+    <string block_id="0" entry_id="1742" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1743" table_id="617">My Pokémon seem to like it here a lot.\n</string>
+
+    <!--Black Belt Jarret-->
+    <string block_id="0" entry_id="1780" table_id="617">Hear the howl of my iron fists! Howdy! I'm crazy for karate!\n\n</string>
+    <string block_id="0" entry_id="1781" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1782" table_id="617">I love seeing people who love Pokémon more than anything!\n</string>
+
+    <!--Ace Trainer Skylar-->
+    <string block_id="0" entry_id="1753" table_id="617">I was born in Floaroma Town. I'm sure thrilled to be here.\nIt took a long time to get here. We're not going to lose again!\n\n</string>
+    <string block_id="0" entry_id="1754" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1755" table_id="617">You can level all you want, but that won't guarantee you any\nwins. But we keep trying to get better. That's what makes us\nTrainers.\n</string>
+
+
+    <!--Ace Trainer Natasha-->
+    <string block_id="0" entry_id="1765" table_id="617">I came here after winning my way through the Battle Tower!\n\n</string>
+    <string block_id="0" entry_id="1766" table_id="617">\n\n</string>
+    <string block_id="0" entry_id="1767" table_id="617">Train more at the Battle Tower... That's what I'll do.\n</string>
+
+
+    <!--First Entering Heatrans Room (Story)-->
+    <string block_id="0" entry_id="0" table_id="264">Charon: ...Cyrus disappeared. Mars and Jupiter quit.\nSaturn said he would look after what remains of Team Galactic.\nBut he won't join me. So foolish of him!\nSo very foolish of the rest of them! Throwing away Team Galactic!\nAfter all the effort we took as a team to make it grow...\nThat power could have made us rich beyond imagination.\nBut, enough of that. The Magma Stone will be mine.\n\n</string>
+    <string block_id="0" entry_id="1" table_id="264">Buck: Hey, you! Team Galactic! What's going on here?!\n\n</string>
+    <string block_id="0" entry_id="2" table_id="264">Charon: Eh? What's this, then? Chased me here, have you?\nI like seeing children try their best, but too bad for you-\nyou're too late. With this Magma Stone I will let awaken the\nlegendary HEATRAN! I will control the volcano's eruptions to\nextort money by the millions! Fear me! For I am Charon!\nThe boss of the rebornTeam Galactic!\n\n</string>
+    <string block_id="0" entry_id="3" table_id="264">???: Go, go, go!\n\n</string>
+    <string block_id="0" entry_id="4" table_id="264">Charon: No! The Magma Stone! What?! What is going on?!\n\n</string>
+    <string block_id="0" entry_id="5" table_id="264">???: Excellent work, CROAGUNK!\n\n</string>
+    <string block_id="0" entry_id="6" table_id="264">Looker: Pah! Disguising myself as a boulder for\nstakeout was not easy!\n\n</string>
+    <string block_id="0" entry_id="7" table_id="264">Now, old-timer, the International Police cordially requests your\ncooperation. I am sure you have much to tell us about the new\nTeam Galactic. With Cyrus, Mars, and Jupiter gone,\nyou are all that is left.\n\n</string>
+    <string block_id="0" entry_id="8" table_id="264">Grunt 1: Hey! It's the International Police!\n\n</string>
+    <string block_id="0" entry_id="9" table_id="264">Grunt 2: Yeah! It's the International Police all right!\nThere's only one thing to be done!\n\n</string>
+    <string block_id="0" entry_id="10" table_id="264">Grunt 1: Run away!\nGrunt 2: Run away!\n\n</string>
+    <string block_id="0" entry_id="11" table_id="264">Charon: Gah... What a mess... ...Uh, International Police?\nWhat are you saying? I know nothing! A new Team Galactic?\nExtorting with HEATRAN? Merely the blathering of this harmless\nold man! All said in jest! Besides, among Team Galactic's\nCommanders, I was the most junior...\n\n</string>
+    <string block_id="0" entry_id="12" table_id="264">Looker: You can tell us all about it. We have plenty of time.\nOh, no, no. No resisting arrest. You can't win three-on-one, no?\nOK, Officers, over here, if you will.\n\n</string>
+    <string block_id="0" entry_id="13" table_id="264">Looker: He is an old man. This heat cannot be good for him.\nQuickly, take him somewhere cool. Yes, the cooler will do!\n\n</string>
+    <string block_id="0" entry_id="14" table_id="264">Looker: {00}! And you, unfamiliar boy!\nI wish to say something. First, it is too hot!\nLet us exit this environment!\n\n</string>
+
+    <!--Being Placed outside after doing the Story Heatrans Room-->
+    <string block_id="0" entry_id="3" table_id="261">Looker: Whew! The air outside, it is delicious, yes! ...Gweh! Gah!\nGeff! Bleah! I have inhaled the volcanic ash by the lungful!\n\n</string>
+    <string block_id="0" entry_id="4" table_id="261">Now, you two. This is what they were after. The Magma Stone.\nMoving this is said to awaken the Pokémon HEATRAN. The old\ntales say that its awakening, it will make Stark Mountain erupt.\n...But I have moved it. It is here. Will this cause the eruption?!\n\n</string>
+    <string block_id="0" entry_id="5" table_id="261">Buck: Hey, don't sweat it, stranger. Give me that Magma Stone.\nI'll go put it back for you.\n\n</string>
+    <string block_id="0" entry_id="6" table_id="261">Looker: That boy, he has quite the energy, yes?\n{00}, I should tell you why I have arrived here.\nAfter we parted at the Mt. Coronet, I investigated their hideout.\nI uncovered Charon's plot, which led me to a stakeout of this\nplace. That Charon is now securely within our custody.\nIt is safe to say the Team Galactic is a threat no longer.\nThat being said, it looks like my work here is finally finished.\n\n</string>
+    <string block_id="0" entry_id="7" table_id="261">Buck: Hey, stranger! I put the Magma Stone where it belongs.\nIt'll be OK now. HEATRAN won't wake up. Probably.\nBut, hey, {00}! You're an amazing Trainer!\nSwing by my place later. It's in the Survival Area.\nBe seeing you, stranger, {00}! Bye-bye!\n\n</string>
+    <string block_id="0" entry_id="8" table_id="261">Looker: I, also, will take my leave.\n“The more wonderful the meeting, the sadder the parting.”\nThat is a quote I have heard many years ago in a foreign land.\nIts meaning... I understand it better now. Farewell,\n{00}, my friend! Long may you cherish Pokémon!\n\n</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ds_strings_archive>
