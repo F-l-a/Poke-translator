@@ -42,11 +42,16 @@
     <string id="5835">Ricevute</string>
     <string id="5834">Scrivi</string>
     <string id="5848">Inviate</string>
+    <string id="5897">▔▔▔▔▔▔▔▔\n[ Claim to Party ]\n▁▁▁▁▁▁▁▁</string>
+    <string id="5898">▔▔▔▔▔▔▔▔\n[ Claim to PC ]\n▁▁▁▁▁▁▁▁</string>
+    <string id="5899">▔▔▔▔▔▔▔▔\n[ Claim Items ]\n▁▁▁▁▁▁▁▁</string>
+    <string id="5900">▔▔▔▔▔▔▔▔\n[ Claim Money ]\n▁▁▁▁▁▁▁▁</string>
 
     <!--Hoenn Secret Base (No Secret Power)-->
     <string id="270776032">A small crevice is seen on the wall.\nA {STRING_110290} may allow you to break it open.</string>
 
     <!--Berry Farming-->
+            <string id="8559">\nPlant Seeds\n</string>
             <string id="16780326">It's soft fertile soil.\nWould you like to plant seeds?</string> <!--planting first seed?-->
             <string id="16780314">This plant is dead.\nIt looks like it did not get enough water.\nDo you want to clean up the plot?</string> <!--Dried to death-->
             <string id="16780319">This plant is dead.\nIt looks like it was overwatered.\nDo you want to clean up the plot?</string> <!--Watered to death-->
@@ -69,7 +74,103 @@
     <!--Using prismatic pearl-->
             <string id="16780460">Are you sure you want to transfer the Hidden Ability\nattribute from {00} to {01}?\n{02} Prismatic Pearls will be consumed.</string>
 
-<!--Npcs-->
+    <!--Fighting Raid Den-->
+        <string id="16805074">You see a faint outline of a {00} in the glowing light.\nYou can sense a challenging battle ahead.</string>
+
+    <!--Npcs-->
+        <!--Event Npcs-->
+            <!--Halloween-->
+        <string id="16800231">Hi! We're on a field trip to show these kids that even\nscary looking {STRING_0} can be good friends!\nCan you capture some of the {STRING_0} swarming around\nand bring them back to us?</string>
+
+    <!--school Teacher-->
+    <string id="16800233">Woah, this {00} looks perfect!\nMy students will love it!\nCan I take it?</string>
+    <string id="16800230">Thanks for your help! They're so excited about the spooky\n{STRING_0} they want some for themselves!\nOh, one of your {STRING_0} found this on the playground.\nBetter you take it!</string>
+
+    <!--interacting with the normal Jack-o lanterns-->
+    <string id="16800203">It's a spooky Jack-o'-lantern!\n"Made in {00}"\nis carved into the back.\n \n[{00} is Where the Pumpking is located\nas well as Pokemon Swarm Turn ins!]</string>
+
+    <!--school kids interact-->
+    <string id="16800234">Wuah, the {STRING_0} outside are scary!</string>
+    <string id="16800248">Why are they so weird looking??</string>
+    <string id="16800249">I don't wanna play outside..</string>
+    <string id="16800247">They're kinda cool though..?</string>
+        <!--school kids interact-->
+        <string id="16800231">Hi! We're on a field trip to show these kids that even\nscary looking {STRING_0} can be good friends!\n\nCan you capture some of the {STRING_0} swarming around\nand bring them back to us?</string>
+
+        <!--school kids asking for your pokemon-->
+        <string id="16800236">Uh, yay! I want your {00}!!\nCan I have it??</string>
+        <string id="16800237">Your {00} looks so mysterious!\nCan I have it??</string>
+        <string id="16800238">I wanna scare my mom and dad!\nCan I have that {00}??</string>
+        <string id="16800239">Do you want to give {00} to the teacher?\nYou wont get it back.</string>
+        <string id="16800240">Do you want to give {00} to the child?\nYou wont get it back.</string>
+
+        <!--Turn in pokemon to the kid-->
+        <string id="16800245">A smile grows on the child's face\nas it reaches out to pet the {00}.</string>
+
+        <string id="16800243">I love my new friend!\nHere, I found this on the playground,\nyou can keep it.</string>
+
+
+    <!--saying no to the kids-->
+        <string id="16800242">You watch the spark of excitement fade\nfrom the child's eyes.</string>
+        <string id="16800250">I don't like you anymore.</string>
+        <string id="16800251">Meanie!</string>
+        <string id="16800252">C'mon! Share!</string>
+        <string id="16800253">I didn't want it anyway!</string>
+
+
+    <!--Trick or Treater Kid npc Battle-->
+    <string id="16800025">Raggiro or treat!</string>
+    <string id="16800026">Boo!</string>
+    <string id="16800027">Happy Halloween!</string>
+
+    <!--Beat a kid-->
+    <string id="16800024">\n\n</string>
+    <!--gives item-->
+    <string id="16800028">All is fair, here you go.</string>
+    <!--gets Mysterious Shard-->
+    <string id="16800255">Here, I will give you something\neven more valuable!</string>
+    <string id="16800256">Tricked you, it's garbage hehe! I think...</string>
+
+    <!--Shards moving-->
+    <string id="16800258">The shards start moving a bit...</string>
+    <string id="16800259">The shards move closer...</string>
+    <string id="16800260">The shards clump together and...</string>
+
+    <!--Pumpking-->
+    <string id="16800040">The pumpkin stares ominously...\nFeed it some candy?</string>
+    <string id="16800041">{01} tossed in the {00}.</string>
+    <string id="16800042">The pumpkin came to life!</string>
+    <!--PK taking the L-->
+    <string id="16800037">The pumpkin stares, lifeless once more.</string>
+    <!--Pumpking easy mode-->
+        <!--P1-->
+            <string id="16800030">Gwahaha! You fools!\nThanks to you I have finally been revived!\nWith this much {STRING_100033}, I'm undefeatable!</string>
+        <!--P2-->
+            <string id="16800031">Blech, you got lucky.\nYou caught me before I could eat all of my {STRING_100033}!\n*Munch* *Munch* *Burp Burp*</string>
+            <string id="16800032">That's more like it!</string>
+        <!--P3-->
+            <string id="16800033">Gwahaha! That wasn't even my final form!\n*Munch* *Munch* *Burp Burp*</string>
+            <string id="16800034">Mwhahahaha!</string>
+    <!--Pumpking Hard mode-->
+        <!--P1-->
+            <string id="16800043">Gwahaha! You want more?! With this much {STRING_100033}\nyou don't stand a chance! Not even a {STRING_16800061}\ncan scare me anymore gwahaha!</string>
+        <!--P2-->
+            <string id="16800044">Grr.. How are you so strong?!\n*Munch Munch* *Burp Burp*</string>
+        <!--P3-->
+            <string id="16800045">That's enough! Let's finish this! *Munch* *Munch*\n*Burp Burp* ... ...That's more like it!</string>
+
+    <!--Pumpking miniboss-->
+    <string id="16800210">Spirits of Halloween have taken over this\nJack-o'-lantern! Their power is overwhelming!\nBut, they only seem interested in Spooky Candy..</string>
+    <string id="16800222">Spirits of Halloween have taken over this\nJack-o'-lantern! Their power is overwhelming!\nDo you want to toss a Spooky Candy to the pumpkin?</string>
+
+
+    <!--Mom wants to take you home-->
+        <string id="16780130">What's that? Did you forget something in {00}?\nDo you want to go back to {00}?</string>
+
+    <!--Cop Blocking you from Heatran if your dex isnt done-->
+        <string id="16777282">Sorry, kid. There's something dangerous in there.\nYou're not ready for it. Come back later.\n \n[You must complete the FULL Caught OT National dex,\nonce completed you may challenge Heatran]</string>
+
+
     <!--Fossil reviver(is used in all regions)-->
         <string id="16807100">Hi! I'm researching {STRING_0} Fossils here.</string>
         <string id="16807101">If you find any, bring them to me.\nI can revive them!</string>
@@ -239,7 +340,7 @@
     <string id="245232">&#xC;&#xA00F;Mirino (ATK)</string>
         <string id="135232">An item to be held by a Pokémon.\nIt is a lens that boosts the holder's\ncritical-hit ratio by 1 stage.</string>
     <string id="245276">&#xC;&#xA010;Zoomlente (ATK)</string>
-        <string id="135276">An item to be held by a Pokémon.\nIf the holder moves after its target,\nits accuracy will be boosted by %20.</string>
+        <string id="135276">An item to be held by a Pokémon.\nIf the holder moves after its target,\nits accuracy will be boosted by 20%.</string>
     <string id="245225">&#xC;&#xA011;Cuorugiada (ATK)</string>
     <string id="245135">&#xC;&#xA012;Adamasfera (ATK)</string>
     <string id="135135">A brightly gleaming orb to be held by\nDialga. It boosts the power of Dragon-\nand Steel-type moves by 20%.</string>
@@ -801,15 +902,6 @@
     <string id="245585">&#xF;&#xA45;Ducatantico (Prezioso)</string>
     <string id="245584">&#xF;&#xA46;Soldantico (Prezioso)</string>
 
-                <!--Halloween Cookies-->
-    <string id="101603">&#xA001;Broom Cookie</string>
-    <string id="101604">&#xA002;Bat Cookie</string>
-    <string id="101605">&#xA003;Pumpkin Cookie</string>
-    <string id="101606">&#xA004;Ghost Cookie</string>
-    <string id="101607">&#xA005;Cat Cookie</string>
-    <string id="101740">&#xA006;Witch Cookie</string>
-    <string id="101742">&#xA007;Werewolf Cookie</string>
-
                 <!--Revival Items-->
     <string id="245029">&#xA050;Revitalizz. Max (Revitalizzante)</string>
     <string id="245028">&#xA051;Revitalizzante (Revitalizzante)</string>
@@ -910,12 +1002,23 @@
     <string id="245061">&#xA003;X Special Atk</string>
     <string id="245062">&#xA004;X Special Def</string>
     <string id="245059">&#xA005;Velocità X</string>
-    <string id="245060">&#xA006;Precisione X</string>
-    <string id="245055">&#xA007;Superguardia</string>
-    <string id="245056">&#xA008;Supercolpo</string>
-    <string id="245063">&#xA009;Poké Bambola</string>
-    <string id="245064">&#xA010;Coda Skitty</string>
-    <string id="245577">&#xA011;Pokégingillo</string>
+    
+        <!--Halloween Cookies-->
+        <string id="101605">&#xA006;Pumpkin Cookie</string>
+        <string id="101606">&#xA007;Ghost Cookie</string>
+        <string id="101603">&#xA008;Broom Cookie</string>
+        <string id="101604">&#xA009;Bat Cookie</string>
+        <string id="101607">&#xA010;Cat Cookie</string>
+        <string id="101740">&#xA011;Witch Cookie</string>
+        <string id="101742">&#xA012;Werewolf Cookie</string>
+
+    <string id="245060">&#xA013;Precisione X</string>
+    <string id="245055">&#xA014;Superguardia</string>
+    <string id="245056">&#xA015;Supercolpo</string>
+
+    <string id="245063">&#xA016;Poké Bambola</string>
+    <string id="245064">&#xA017;Coda Skitty</string>
+    <string id="245577">&#xA018;Pokégingillo</string>
 
     <!--PokeBalls-->
     <string id="245004">&#xA000;Poké Ball</string>

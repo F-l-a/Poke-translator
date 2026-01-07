@@ -158,11 +158,11 @@ def apply_translations(lang_code):
     # Update XML attributes using regex patterns
     import re
     
-    # Update name attribute: add " ITA(ClientENG)"
+    # Update name attribute: add " {lang_code.upper()}(ClientENG)"
     updated_content = re.sub(
-      r'(<resource\s+name="[^"]*)"',
-      r'\1 ITA(ClientENG)"',
-      updated_content
+        r'(<resource\s+name="[^"]*)"',
+        rf'\1 {lang_code.upper()}(ClientENG)"',
+        updated_content
     )
     
     # Update version attribute: add "-mod_{mod_version}"
