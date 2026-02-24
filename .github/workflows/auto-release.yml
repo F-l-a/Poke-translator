@@ -6,7 +6,7 @@ on:
       is_automatic:
         description: 'Set to true for automatic runs (internal use)'
         required: false
-        default: 'false'
+        default: false
         type: boolean
       mod_version:
         description: 'Manual mod version override (e.g., 1.0.1a). Leave empty for auto-calc.'
@@ -16,7 +16,7 @@ on:
       force_release:
         description: 'Force release even if no recent update is found (manual runs only)'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 permissions:
@@ -45,86 +45,74 @@ jobs:
       run: |
         echo "is_automatic_run=${{ inputs.is_automatic }}" >> $GITHUB_OUTPUT
         
-        # For manual runs, check if we should proceed
         if [ "${{ inputs.is_automatic }}" = "false" ]; then
           if [ "${{ inputs.force_release }}" = "true" ]; then
             echo "Proceeding due to force_release=true"
             echo "proceed=true" >> $GITHUB_OUTPUT
           else
-            # In a manual run without force, we can add a check if needed,
-            # but for now, we'll assume a manual run intends to release.
             echo "Proceeding with manual run"
             echo "proceed=true" >> $GITHUB_OUTPUT
           fi
         else
-          # Automatic runs always proceed
           echo "Proceeding with automatic run"
           echo "proceed=true" >> $GITHUB_OUTPUT
         fi
         
-        # Get submodule tag
+        # Estrai l'hash corto del sottomodulo (non più la tag)
         cd input/SupersStrings
-        SUBMODULE_TAG=$(git describe --tags --abbrev=0)
+        SUBMODULE_HASH=$(git rev-parse --short HEAD)
         cd ../..
-        echo "submodule_tag=$SUBMODULE_TAG" >> $GITHUB_OUTPUT
-        echo "Detected SupersStrings version: $SUBMODULE_TAG"
+        echo "submodule_hash=$SUBMODULE_HASH" >> $GITHUB_OUTPUT
+        echo "Detected SupersStrings commit: $SUBMODULE_HASH"
 
     - name: Calculate new mod version
       if: steps.check_context.outputs.proceed == 'true'
       id: calc_version
       run: |
-        SUBMODULE_TAG="${{ steps.check_context.outputs.submodule_tag }}"
+        SUBMODULE_HASH="${{ steps.check_context.outputs.submodule_hash }}"
         IS_AUTOMATIC="${{ inputs.is_automatic }}"
         MOD_VERSION=""
 
-        # 1. Handle manual override first
+        # 1. Override manuale
         if [ "$IS_AUTOMATIC" = "false" ] && [ -n "${{ inputs.mod_version }}" ]; then
           MOD_VERSION="${{ inputs.mod_version }}"
           echo "Rule: Manual override. Using provided version: $MOD_VERSION"
         else
-          # 2. Get info about the absolute latest mod release
+          # 2. Ottieni l'ultima tag globale della mod
           LATEST_OVERALL_TAG=$(git tag -l "*-mod_*" | sort -V | tail -1)
           
           if [ -z "$LATEST_OVERALL_TAG" ]; then
-            # This is the very first release of the mod
             MOD_VERSION="1.0.0"
             echo "Rule: First ever release. Starting with $MOD_VERSION."
           else
-            LATEST_OVERALL_SUBMODULE_TAG=$(echo "$LATEST_OVERALL_TAG" | sed -n 's/-mod_.*//p')
+            LATEST_OVERALL_SUBMODULE_HASH=$(echo "$LATEST_OVERALL_TAG" | sed -n 's/-mod_.*//p')
             LATEST_OVERALL_MOD_VERSION=$(echo "$LATEST_OVERALL_TAG" | sed -n 's/.*-mod_//p')
+            BASE_VERSION=$(echo "$LATEST_OVERALL_MOD_VERSION" | sed 's/[a-z]*$//')
             
-            # 3. Check if the submodule version has changed (Scenario 1)
-            if [ "$SUBMODULE_TAG" != "$LATEST_OVERALL_SUBMODULE_TAG" ]; then
-              # Rule: Submodule has been updated. Reuse the latest mod version number.
-              MOD_VERSION=$(echo "$LATEST_OVERALL_MOD_VERSION" | sed 's/[a-z]*$//') # Remove any letter suffix
-              echo "Rule: Submodule updated ($LATEST_OVERALL_SUBMODULE_TAG -> $SUBMODULE_TAG). Reusing mod version: $MOD_VERSION."
-            else
-              # Rule: Submodule version is the same. We need to increment the mod version.
-              # Find the latest mod version for THIS specific submodule tag
-              LATEST_TAG_FOR_SUBMODULE=$(git tag -l "${SUBMODULE_TAG}-mod_*" | sort -V | tail -1)
-              PREV_MOD_VERSION=$(echo "$LATEST_TAG_FOR_SUBMODULE" | sed -n 's/.*-mod_//p')
-              BASE_VERSION=$(echo "$PREV_MOD_VERSION" | sed 's/[a-z]*$//')
-              
-              # Increment patch number
+            # 3. Confronta gli hash per capire cosa è cambiato
+            if [ "$SUBMODULE_HASH" != "$LATEST_OVERALL_SUBMODULE_HASH" ]; then
+              # Scenario 1: Il sottomodulo è stato aggiornato. Incrementiamo la patch (es. 1.0.0 -> 1.0.1)
               MAJOR_MINOR=$(echo "$BASE_VERSION" | cut -d. -f1-2)
               PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
-              NEW_PATCH=$((PATCH + 1))
-              MOD_VERSION="${MAJOR_MINOR}.${NEW_PATCH}"
-              
-              # Append 'a' for automatic releases on the same submodule version (Scenario 2)
-              if [ "$IS_AUTOMATIC" = "true" ]; then
-                MOD_VERSION="${MOD_VERSION}a"
-                echo "Rule: Automatic release on same submodule. Incrementing to $MOD_VERSION."
+              MOD_VERSION="${MAJOR_MINOR}.$((PATCH + 1))"
+              echo "Rule: Submodule updated ($LATEST_OVERALL_SUBMODULE_HASH -> $SUBMODULE_HASH). Bumping version to: $MOD_VERSION."
+            else
+              # Scenario 2: Sottomodulo identico. Incrementiamo la lettera (es. 1.0.1 -> 1.0.1a)
+              if [[ "$LATEST_OVERALL_MOD_VERSION" =~ [a-z]$ ]]; then
+                LAST_CHAR="${LATEST_OVERALL_MOD_VERSION: -1}"
+                NEXT_CHAR=$(printf "\\$(printf '%03o' "$(( $(printf '%d' "'$LAST_CHAR") + 1 ))")")
+                MOD_VERSION="${BASE_VERSION}${NEXT_CHAR}"
               else
-                echo "Rule: Manual release on same submodule. Incrementing to $MOD_VERSION."
+                MOD_VERSION="${BASE_VERSION}a"
               fi
+              echo "Rule: Same submodule. Incrementing revision letter to $MOD_VERSION."
             fi
           fi
         fi
 
-        # --- Final Step: Tag Conflict Resolution (Scenario 3) ---
+        # --- Final Step: Tag Conflict Resolution ---
         while true; do
-          PROPOSED_TAG="${SUBMODULE_TAG}-mod_${MOD_VERSION}"
+          PROPOSED_TAG="${SUBMODULE_HASH}-mod_${MOD_VERSION}"
           if git rev-parse "$PROPOSED_TAG" >/dev/null 2>&1; then
             echo "Conflict: Tag $PROPOSED_TAG already exists. Incrementing letter."
             if [[ "$MOD_VERSION" =~ [a-z]$ ]]; then
@@ -173,49 +161,21 @@ jobs:
         cd ../..
         echo "Created release package: ${ZIP_NAME}.zip"
 
-    - name: Get previous release body
-      if: steps.check_context.outputs.proceed == 'true'
-      id: get_prev_release
-      run: |
-        # Fetch the body of the latest release
-        PREV_BODY=$(gh release view --json body --jq '.body' 2>/dev/null || echo "")
-        
-        # Save the body to a file to handle multiline content
-        echo "$PREV_BODY" > prev_body.txt
-        echo "Fetched previous release body."
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Create GitHub Release
       if: steps.check_context.outputs.proceed == 'true'
       id: create_release
       run: |
         FINAL_TAG="${{ steps.calc_version.outputs.final_tag }}"
-        SUBMODULE_TAG="${{ steps.check_context.outputs.submodule_tag }}"
-        MOD_VERSION_NUM="${{ steps.calc_version.outputs.final_mod_version }}"
+        SUBMODULE_HASH="${{ steps.check_context.outputs.submodule_hash }}"
         ZIP_NAME="${{ steps.create_package.outputs.zip_name }}"
         
-        # Define release title
         if [ "${{ inputs.is_automatic }}" = "true" ]; then
           RELEASE_TITLE="SupersStoryStrings ${FINAL_TAG} - AUTOMATIC RELEASE"
         else
           RELEASE_TITLE="SupersStoryStrings ${FINAL_TAG}"
         fi
 
-        # Prepare new changelog entry
-        NEW_CHANGELOG_ENTRY="**Version ${FINAL_TAG}:**
-        - Updated SupersStrings to [${SUBMODULE_TAG}](https://github.com/superworldsun/SupersStrings/releases/tag/${SUBMODULE_TAG})"
-
-        # Get existing changelog from previous release body
-        PREV_BODY=$(cat prev_body.txt)
-        if [[ "$PREV_BODY" == *"## Changelog"* ]]; then
-          # Extract everything from the line AFTER "## Changelog"
-          EXISTING_CHANGELOG=$(echo "$PREV_BODY" | sed -n '/## Changelog/,$p' | tail -n +2)
-        else
-          EXISTING_CHANGELOG=""
-        fi
-
-        # Construct the final release body
+        # Changelog snello basato sul commit
         FINAL_BODY=$(cat <<EOF
         This mod translates the following into Italian: Buttons, Items, Natures (Multi-language), Abilities (Multi-language), and Locations (Multi-language).
 
@@ -227,13 +187,11 @@ jobs:
 
         ## Changelog
 
-        ${NEW_CHANGELOG_ENTRY}
-
-        ${EXISTING_CHANGELOG}
+        **Version ${FINAL_TAG}:**
+        - Built against SupersStrings commit: \`${SUBMODULE_HASH}\`
         EOF
         )
 
-        # Create the release
         gh release create "$FINAL_TAG" \
           --title "$RELEASE_TITLE" \
           --notes "$FINAL_BODY" \
@@ -254,7 +212,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Execution Type**: $EXEC_TYPE" >> $GITHUB_STEP_SUMMARY
         echo "**New Release Tag**: \`${{ steps.calc_version.outputs.final_tag }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "**SupersStrings Version**: \`${{ steps.check_context.outputs.submodule_tag }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**SupersStrings Hash**: \`${{ steps.check_context.outputs.submodule_hash }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**Mod File**: \`${{ steps.create_package.outputs.zip_name }}.zip\`" >> $GITHUB_STEP_SUMMARY
         
         if [ "${{ inputs.is_automatic }}" = "false" ] && [ -n "${{ inputs.mod_version }}" ]; then
