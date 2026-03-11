@@ -13,7 +13,7 @@ def translations_generator_manager():
   then generates the corresponding JSON translation file.
   """
   endpoints = [
-    "ability", "berry", "item", "location", "move", "nature", "region", "type"
+    "ability", "berry", "item", "location", "move", "nature", "region", "type", "egg-group"
   ]
   
   print_menu(endpoints, "Choose an endpoint to generate JSON from:")
