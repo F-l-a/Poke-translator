@@ -1,17 +1,18 @@
 {
   "Monster": "Mostro",
-  "Water 1": "Acqua 1",
+  "Water A": "Acqua A",
   "Bug": "Coleottero",
   "Flying": "Volante",
   "Field": "Campo",
   "Fairy": "Magico",
-  "Grass": "Erba",
-  "Human-Like": "Umanoide",
-  "Water 3": "Acqua 3",
+  "Plant": "Pianta",
+  "Humanoid": "Umanoide",
+  "Water C": "Acqua C",
   "Mineral": "Minerale",
-  "Amorphous": "Amorfo",
-  "Water 2": "Acqua 2",
+  "Chaos": "Caos",
+  "Water B": "Acqua B",
   "Ditto": "Ditto",
   "Dragon": "Drago",
-  "Undiscovered": "Non ancora scoperto"
+  "Cannot Breed": "Non Accoppiabile",
+  "Genderless": "Senza Genere"
 }
