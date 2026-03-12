@@ -1,17 +1,22 @@
 {
-  "Monster": "Monstrueux",
-  "Water 1": "Aquatique 1",
-  "Bug": "Insectoïde",
-  "Flying": "Aérien",
-  "Field": "Terrestre",
-  "Fairy": "Féerique",
-  "Grass": "Végétal",
-  "Human-Like": "Humanoïde",
-  "Water 3": "Aquatique 3",
+  "Monster": "Monstre",
+  "Water A": "Eau A",
+  "Bug": "Insecte",
+  "Flying": "Vol",
+  "Field": "Terrain",
+  "Fairy": "Fée",
+  "Plant": "Plante",
+  "Humanoid": "Humanoïde",
+  "Water C": "Eau C",
   "Mineral": "Minéral",
+  "Chaos": "Chaos",
   "Amorphous": "Amorphe",
-  "Water 2": "Aquatique 2",
+  "Water B": "Eau B",
   "Ditto": "Métamorph",
-  "Dragon": "Draconique",
+  "Dragon": "Dragon",
+  "Cannot Breed": "Ne peuvent pas se reproduire",
+  "Genderless": "Asexué",
   "Undiscovered": "Inconnu"
+
 }
+
