@@ -21,7 +21,18 @@ Italian translations are already present in this repository, but other languages
 2. **Set up Python environment and install dependencies:**
    ```bash
    python -m venv .venv
-   .venv\Scripts\activate  # <- On Windows | On Linux/Mac -> .venv/bin/activate
+   # Windows PowerShell
+   .\\.venv\\Scripts\\Activate.ps1
+
+   # If PowerShell blocks script execution for the current session
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   .\\.venv\\Scripts\\Activate.ps1
+
+   # Windows Command Prompt
+   .venv\Scripts\activate.bat
+
+   # Linux / macOS
+   source .venv/bin/activate
    pip install -r requirements.txt
    ```
 
@@ -52,9 +63,32 @@ Italian translations are already present in this repository, but other languages
 
 7. **If you want to use the tool another time:**
    ```bash
-   .venv\Scripts\activate  # <- On Windows | On Linux/Mac -> .venv/bin/activate
+   # Windows PowerShell
+   .\\.venv\\Scripts\\Activate.ps1
+
+   # Windows Command Prompt
+   .venv\Scripts\activate.bat
+
+   # Linux / macOS
+   source .venv/bin/activate
    python main.py
    ```
+
+### PowerShell note
+
+If you get a `PSSecurityException` saying script execution is disabled, PowerShell is blocking `Activate.ps1`.
+For a temporary workaround in the current terminal only, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+If you prefer not to change the PowerShell policy at all, use Command Prompt and run:
+
+```bat
+.venv\Scripts\activate.bat
+```
 
 ## Useful [PokeAPI](https://pokeapi.co) Endpoints
 
