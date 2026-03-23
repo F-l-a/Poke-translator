@@ -5,25 +5,47 @@ import os
 import csv
 from utils import print_menu, get_user_choice, get_available_languages
 
-def translations_generator_manager():
+def get_client_dump_languages() -> list:
+  """
+  Returns a list of available languages based on folder names in the
+  PokemmoClientDumps directory, excluding 'en'.
+  """
+  input_dir = "./input/PokemmoClientDumps"
+  en_dir_path = os.path.join(input_dir, 'en')
+
+  try:
+    if not os.path.isdir(en_dir_path):
+      print(f"Error: English 'en' directory not found at '{en_dir_path}'")
+      return []
+    
+    langs = [name for name in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, name)) and name != 'en']
+    return sorted(langs)
+  except FileNotFoundError:
+    print(f"Error: Directory not found at '{input_dir}'")
+    return []
+
+def translations_generator_manager(base_path: str):
   """
   Main manager function for the translations generator.
   
   Handles user interaction for selecting endpoint and target language,
   then generates the corresponding JSON translation file.
   """
-  endpoints = [
-    "ability", "berry", "item", "location", "move", "nature", "region", "type", "egg-group", "pokemon-species"
-  ]
+  if 'PokemmoClientDump' in base_path:
+    endpoints = ["pokemon-species", "move", "ability", "region", "egg-group"]
+    lang_list = get_client_dump_languages()
+  else:
+    endpoints = [
+      "ability", "berry", "item", "location", "move", "nature", "region", "type", "egg-group", "pokemon-species"
+    ]
+    lang_list = get_available_languages()
   
-  print_menu(endpoints, "Choose an endpoint to generate JSON from:")
-  endpoint_choice = get_user_choice(endpoints)
+  menu_endpoints = ["Generate All"] + endpoints
+  print_menu(menu_endpoints, "Choose an endpoint to generate JSON from:")
+  endpoint_choice = get_user_choice(menu_endpoints)
   if endpoint_choice == 0:
     return
 
-  endpoint = endpoints[endpoint_choice - 1]
-
-  lang_list = get_available_languages()
   print_menu(lang_list, "Choose target language:")
   lang_choice = get_user_choice(lang_list)
   if lang_choice == 0:
@@ -31,15 +53,23 @@ def translations_generator_manager():
 
   lang_code = lang_list[lang_choice - 1]
 
-  print(f"\nGenerating {endpoint}-{lang_code}.json...")
-  data = get_translations(endpoint, lang_code)
-  if data:
-    save_json(data, endpoint, lang_code)
-    print(f"File '{endpoint}-{lang_code}.json' generated successfully!\n")
+  endpoints_to_process = []
+  selected_option = menu_endpoints[endpoint_choice - 1]
+  if selected_option == "Generate All":
+    endpoints_to_process = endpoints
   else:
-    print(f"No translations found for '{endpoint}' in '{lang_code}'. File not generated.\n")
+    endpoints_to_process.append(selected_option)
 
-def get_translations(endpoint: str, lang_code: str) -> dict:
+  for endpoint in endpoints_to_process:
+    print(f"\nGenerating {endpoint}-{lang_code}.json...")
+    data = get_translations(endpoint, lang_code, base_path)
+    if data:
+      save_json(data, endpoint, lang_code, base_path)
+      print(f"File '{endpoint}-{lang_code}.json' generated successfully!\n")
+    else:
+      print(f"No translations found for '{endpoint}' in '{lang_code}'. File not generated.\n")
+
+def get_translations(endpoint: str, lang_code: str, base_path: str) -> dict:
   """
   Retrieves translations from English to the specified language for a PokeAPI endpoint.
   
@@ -54,6 +84,100 @@ def get_translations(endpoint: str, lang_code: str) -> dict:
   Returns:
     dict: Dictionary mapping {english_name: translated_name}
   """
+
+  if 'PokemmoClientDump' in base_path:
+    # --- Configuration-driven extraction for Client Dumps ---
+    
+    def _extract_id_name_map(data, config):
+      """Helper to extract a map of {id: name} from dump data based on config."""
+      item_map = {}
+      item_path = config.get("item_path")
+      id_path = config["id_path"]
+      name_path = config["name_path"]
+
+      for top_level_item in data:
+        items_to_process = []
+        if item_path:
+          nested_items = top_level_item.get(item_path, [])
+          if isinstance(nested_items, list):
+            items_to_process = nested_items
+        else:
+          items_to_process = [top_level_item]
+        
+        for item in items_to_process:
+          item_id = item.get(id_path)
+          item_name = item.get(name_path, "").strip()
+          if item_id is not None and item_name:
+            item_map[item_id] = item_name
+      return item_map
+
+    try:
+      with open('./input/PokemmoClientDumps/client_dump_config.json', 'r', encoding='utf-8') as f:
+        configs = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+      print(f"Error reading or parsing config file: {e}")
+      return {}
+
+    endpoint_config = next((c for c in configs if c['endpoint'] == endpoint), None)
+
+    if not endpoint_config:
+      print(f"No configuration found for endpoint '{endpoint}'")
+      return {}
+      
+    file_name = endpoint_config["file"]
+    en_file_path = f"./input/PokemmoClientDumps/en/{file_name}"
+    lang_file_path = f"./input/PokemmoClientDumps/{lang_code}/{file_name}"
+
+    try:
+      with open(en_file_path, 'r', encoding='utf-8') as f:
+        en_data = json.load(f)
+      with open(lang_file_path, 'r', encoding='utf-8') as f:
+        lang_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+      print(f"Error reading JSON files: {e}")
+      return {}
+
+    results = {}
+    extractor_type = endpoint_config.get("extractor_type", "id_name_map")
+
+    if extractor_type == "id_name_map":
+      en_map = _extract_id_name_map(en_data, endpoint_config)
+      lang_map = _extract_id_name_map(lang_data, endpoint_config)
+      for item_id, en_name in en_map.items():
+        lang_name = lang_map.get(item_id)
+        if lang_name:
+          results[en_name] = lang_name
+        else:
+          print(f"Warning: No translation found for ID {item_id} ('{en_name}')")
+    
+    elif extractor_type == "string_list_pairs":
+      item_path = endpoint_config["item_path"]
+      if len(en_data) != len(lang_data):
+        print("Error: The number of top-level items do not match.")
+        return {}
+      
+      for en_top_item, lang_top_item in zip(en_data, lang_data):
+        if en_top_item.get("id") != lang_top_item.get("id"):
+          print(f"Warning: Top-level ID mismatch, skipping item {en_top_item.get('id')}")
+          continue
+        
+        en_list = en_top_item.get(item_path, [])
+        lang_list = lang_top_item.get(item_path, [])
+
+        if len(en_list) == len(lang_list):
+          for en_str, lang_str in zip(en_list, lang_list):
+            if en_str and lang_str:
+              # Apply title case formatting specifically for egg-group
+              if endpoint == "egg-group":
+                en_str = en_str.title()
+                lang_str = lang_str.title()
+              
+              if en_str not in results:
+                results[en_str] = lang_str
+        elif en_list or lang_list:
+          print(f"Warning: List length mismatch for '{item_path}' in item ID {en_top_item.get('id')}")
+
+    return results
   
   # Get all resources for this endpoint (APIResourceList handles pagination automatically)
   resource_list = pb.APIResourceList(endpoint)
@@ -114,7 +238,7 @@ def get_translations(endpoint: str, lang_code: str) -> dict:
       continue
 
   # Save missing translations to CSV
-  if missing_translations:
+  if missing_translations and 'pokeapi' in base_path:
     save_missing_translations_csv(missing_translations, endpoint, lang_code)
     print(f"Saved {len(missing_translations)} missing translations in {endpoint}_names.csv")
 
@@ -133,7 +257,7 @@ def save_missing_translations_csv(missing_translations: list, endpoint: str, lan
     endpoint (str): Endpoint name for the filename
     lang_code (str): Language code for organizing files
   """
-  directory = f"./translations/{lang_code}/missing"
+  directory = f"./translations/pokeapi/{lang_code}/missing"
   filename = f"{directory}/{endpoint}_names.csv"
   os.makedirs(directory, exist_ok=True)
   
@@ -150,7 +274,7 @@ def save_missing_translations_csv(missing_translations: list, endpoint: str, lan
     # Write all missing translations
     writer.writerows(missing_translations)
 
-def save_json(data: dict, endpoint: str, lang_code: str):
+def save_json(data: dict, endpoint: str, lang_code: str, base_path: str):
   """
   Saves translation data to a JSON file.
   
@@ -162,7 +286,7 @@ def save_json(data: dict, endpoint: str, lang_code: str):
     endpoint (str): Endpoint name for the filename
     lang_code (str): Language code for organizing files
   """
-  directory = f"./translations/{lang_code}"
+  directory = f"{base_path}/{lang_code}"
   filename = f"{directory}/{endpoint}-{lang_code}.json"
   os.makedirs(directory, exist_ok=True)
   with open(filename, "w", encoding="utf-8") as f:

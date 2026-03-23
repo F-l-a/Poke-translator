@@ -1,0 +1,36 @@
+[
+  {
+    "endpoint": "pokemon-species",
+    "file": "monsters.json",
+    "item_path": null,
+    "id_path": "id",
+    "name_path": "name"
+  },
+  {
+    "endpoint": "move",
+    "file": "skills.json",
+    "item_path": null,
+    "id_path": "id",
+    "name_path": "name"
+  },
+  {
+    "endpoint": "ability",
+    "file": "monsters.json",
+    "item_path": "abilities",
+    "id_path": "id",
+    "name_path": "name"
+  },
+  {
+    "endpoint": "region",
+    "file": "monsters.json",
+    "item_path": "locations",
+    "id_path": "region_id",
+    "name_path": "region_name"
+  },
+  {
+    "endpoint": "egg-group",
+    "file": "monsters.json",
+    "item_path": "egg_groups",
+    "extractor_type": "string_list_pairs"
+  }
+]

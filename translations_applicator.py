@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from utils import print_menu, get_user_choice
 
-def get_available_translation_languages():
+def get_available_translation_languages(base_path: str):
   """
   Returns a list of available languages based on /translations folders
   that actually contain JSON translation files.
@@ -15,7 +15,7 @@ def get_available_translation_languages():
   Returns:
     list: Sorted list of available language codes
   """
-  translations_dir = "translations"
+  translations_dir = base_path
   languages = []
   
   if os.path.exists(translations_dir):
@@ -37,17 +37,17 @@ def get_available_translation_languages():
   
   return sorted(languages)
 
-def translations_applicator_manager():
+def translations_applicator_manager(base_path: str):
   """
   Main menu for the translation applicator.
   
   Handles user interaction for selecting target language and
   initiating the translation process for all input files.
   """
-  languages = get_available_translation_languages()
+  languages = get_available_translation_languages(base_path)
   
   if not languages:
-    print("No languages available in /translations folder")
+    print(f"No languages available in {base_path} folder")
     return
   
   print_menu(languages, "Choose target language:")
@@ -57,9 +57,9 @@ def translations_applicator_manager():
     return
   
   lang_code = languages[lang_choice - 1]
-  apply_translations(lang_code)
+  apply_translations(lang_code, base_path)
 
-def apply_translations(lang_code):
+def apply_translations(lang_code, base_path):
   """
   Applies translations for the specified language to files specified in info.xml.
   
@@ -68,6 +68,7 @@ def apply_translations(lang_code):
   
   Args:
     lang_code (str): Target language code (e.g., 'it', 'fr', 'es')
+    base_path (str): Base path to the input directory
   """
   # Ask for mod version
   print(f"\nTranslating to: {lang_code.upper()}")
@@ -82,9 +83,9 @@ def apply_translations(lang_code):
   # Paths - use SupersStrings submodule
   input_dir = os.path.join("input", "SupersStrings", "SupersStoryStrings")
   info_xml_path = os.path.join(input_dir, "info.xml")
-  translations_dir = f"translations/{lang_code}"
+  translations_dir = f"{base_path}/{lang_code}"
   output_dir = f"output/{lang_code.upper()}"
-  special_cases_file = f"translations/{lang_code}/special_cases-{lang_code}.json"
+  special_cases_file = f"{base_path}/{lang_code}/special_cases-{lang_code}.json"
   
   # Check if input directory and info.xml exist
   if not os.path.exists(input_dir):

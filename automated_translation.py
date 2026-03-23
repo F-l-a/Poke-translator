@@ -34,9 +34,9 @@ def apply_translations_automated(lang_code, mod_version):
     # Paths
     input_dir = os.path.join("input", "SupersStrings", "SupersStoryStrings")
     info_xml_path = os.path.join(input_dir, "info.xml")
-    translations_dir = f"translations/{lang_code}"
+    translations_dir = f"translations/pokeapi/{lang_code}"
     output_dir = f"output/{lang_code.upper()}"
-    special_cases_file = f"translations/{lang_code}/special_cases-{lang_code}.json"
+    special_cases_file = f"translations/pokeapi/{lang_code}/special_cases-{lang_code}.json"
     
     # Check paths
     if not os.path.exists(input_dir):

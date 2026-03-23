@@ -23,9 +23,31 @@ def main():
       print("Exiting.")
       break
     elif main_choice == 1:
-      translations_generator_manager()
+      print_menu(["pokeapi", "PokemmoClientDump"], "Select translation source:")
+      source_choice = get_user_choice(["pokeapi", "PokemmoClientDump"])
+      if source_choice == 0:
+        continue
+      if source_choice == 1:
+        source = "pokeapi"
+      elif source_choice == 2:
+        source = "PokemmoClientDump"
+      else:
+        print("Invalid selection.")
+        continue
+      base_path = f"./translations/{source}"
+      translations_generator_manager(base_path)
     elif main_choice == 2:
-      translations_applicator_manager()
+      print_menu(["pokeapi", "PokemmoClientDump - not implemented yet"], "Select translation source:")
+      source_choice = get_user_choice(["pokeapi", "PokemmoClientDump"])
+      if source_choice == 0:
+        continue
+      elif source_choice == 1:
+        source = "pokeapi"
+        base_path = f"./translations/{source}"
+        translations_applicator_manager(base_path)
+      elif source_choice == 2:
+        print("This option is not yet implemented.")
+        continue
     elif main_choice == 3:
       manage_cache()
 
